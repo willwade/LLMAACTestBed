@@ -2,19 +2,19 @@
   {
     "id": 201,
     "target_ground_truth": "Water.",
-    "scenario": "Kelly holding a glass.",
+    "scenario": "Kelsey holding a glass.",
     "last_utterance": "Do you want this?"
   },
   {
     "id": 202,
     "target_ground_truth": "Fan on.",
-    "scenario": "Dwayne sweating.",
+    "scenario": "Dave sweating.",
     "last_utterance": "You look a bit flushed."
   },
   {
     "id": 203,
     "target_ground_truth": "Suction.",
-    "scenario": "Dwayne gurgling/choking.",
+    "scenario": "Dave gurgling/choking.",
     "last_utterance": "You sound rattly. Shall I get the machine?"
   },
   {

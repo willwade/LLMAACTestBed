@@ -6,13 +6,13 @@
 
 Standard predictive text and generic LLMs fail AAC users because they prioritize "polite conversation" over "functional tools." We hypothesize that by layering **Static Context** (User Profile) and **Dynamic Context** (Time/Location) over speech input, we can move from generic chat to precise intent prediction.
 
-**Subject Persona:** "Dwayne" – Late-stage MND, telegraphic speech, developer background. **Critical Constraints:** High fatigue (limited breath for speech), temperature dysregulation, dependence on specific equipment (NIV Mask, Fan).
+**Subject Persona:** "Dave" – Late-stage MND, telegraphic speech, developer background. **Critical Constraints:** High fatigue (limited breath for speech), temperature dysregulation, dependence on specific equipment (NIV Mask, Fan).
 
 ## **Repository Structure**
 
 ### **Data & Context**
 
-* **`dwayne_context.json`**: The "Brain." Contains the static knowledge graph: medical needs, equipment list (Fan, Mask), social graph (Kelly, Dawn), and routine markers.  
+* **`Dave_context.json`**: The "Brain." Contains the static knowledge graph: medical needs, equipment list (Fan, Mask), social graph (Kelsey, Dawn), and routine markers.  
 * **`transcript_data_2.json`**: Ground truth scenarios for Experiment 1 (The strict context test).  
 * **`transcript_vague.json`**: Ambiguous input scenarios for Experiment 2 (e.g., "Do you want this?").
 
@@ -30,11 +30,11 @@ Standard predictive text and generic LLMs fail AAC users because they prioritize
 
 ## **The Knowledge Graph (User Profile)**
 
-The core of our "Smart" system is the **Static Profile** (`dwayne_context.json`). This JSON structure acts as the "Long Term Memory" for the LLM, providing it with the medical and social nuances required to interpret telegraphic speech.
+The core of our "Smart" system is the **Static Profile** (`Dave_context.json`). This JSON structure acts as the "Long Term Memory" for the LLM, providing it with the medical and social nuances required to interpret telegraphic speech.
 
 {  
   "identity": {  
-    "name": "Dwayne",  
+    "name": "Dave",  
     "age": 45,  
     "condition": "MND (Motor Neurone Disease)",  
     "former\_occupation": "Software Developer",  
@@ -61,17 +61,17 @@ The core of our "Smart" system is the **Static Profile** (`dwayne_context.json`)
     \]  
   },  
   "social\_graph": {  
-    "Kelly": {  
+    "Kelsey": {  
       "relation": "Wife / Primary Carer",  
       "occupation": "QA Tester",  
       "personality": "Efficient, protective, stressed, anticipates needs, dislikes admin.",  
-      "dynamic": "Dwayne feels guilty about her workload; she manages his 'inputs' (meds/calls) and 'outputs' (interpreting speech)."  
+      "dynamic": "Dave feels guilty about her workload; she manages his 'inputs' (meds/calls) and 'outputs' (interpreting speech)."  
     },  
     "Dawn": {  
       "relation": "Mother",  
       "hobbies": \["Knitting"\],  
-      "personality": "Emotional, anxious, loves Dwayne but requires emotional management.",  
-      "communication\_barrier": "Dwayne finds Facetime exhausting; she struggles to hear/lipread him."  
+      "personality": "Emotional, anxious, loves Dave but requires emotional management.",  
+      "communication\_barrier": "Dave finds Facetime exhausting; she struggles to hear/lipread him."  
     },  
     "Mia": {  
       "relation": "Step-daughter",  
@@ -118,7 +118,7 @@ The core of our "Smart" system is the **Static Profile** (`dwayne_context.json`)
 **Key Findings:**
 
 * **H5 (Speech \+ Profile) is strong:** Scoring 9s/10s on clear requests. Knowing the user's profile is 80% of the battle.  
-* **H4 (Full Context) is safer:** In Scenario 103 ("Fan Incident"), Kelly says "You'll freeze." H5 (Speech Only) agreed and predicted "Window shut." H4 used the medical profile \+ environmental context to correctly predict **"Fan on"**(due to temperature dysregulation).
+* **H4 (Full Context) is safer:** In Scenario 103 ("Fan Incident"), Kelsey says "You'll freeze." H5 (Speech Only) agreed and predicted "Window shut." H4 used the medical profile \+ environmental context to correctly predict **"Fan on"**(due to temperature dysregulation).
 
 *Figure 1: While Speech+Profile (Grey) performs well generally, Full Context (Green) closes the gap in safety-critical or socially complex scenarios (ID 102, 105).*
 
@@ -126,7 +126,7 @@ The core of our "Smart" system is the **Static Profile** (`dwayne_context.json`)
 
 **Script:** `uv run run_speech_ablation.py`
 
-**Logic:** We stripped away the `dwayne_context.json` to see how a "Raw" LLM (like ChatGPT/Siri) handles vague cues compared to our "Smart" system.
+**Logic:** We stripped away the `Dave_context.json` to see how a "Raw" LLM (like ChatGPT/Siri) handles vague cues compared to our "Smart" system.
 
 **Results:**
 

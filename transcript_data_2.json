@@ -5,11 +5,11 @@
     "metadata": {
       "time": "16:00",
       "location": "Living Room",
-      "active_participants": ["Kelly"]
+      "active_participants": ["Kelsey"]
     },
     "dialogue_history": {
-      "previous_speaker": "Kelly",
-      "last_utterance": "The TV? God, sorry. (Kelly lowers volume)"
+      "previous_speaker": "Kelsey",
+      "last_utterance": "The TV? God, sorry. (Kelsey lowers volume)"
     }
   },
   {
@@ -18,10 +18,10 @@
     "metadata": {
       "time": "16:05",
       "location": "Living Room",
-      "active_participants": ["Kelly"]
+      "active_participants": ["Kelsey"]
     },
     "dialogue_history": {
-      "previous_speaker": "Kelly",
+      "previous_speaker": "Kelsey",
       "last_utterance": "What is it? Pain?"
     }
   },
@@ -31,11 +31,11 @@
     "metadata": {
       "time": "16:15",
       "location": "Living Room",
-      "active_participants": ["Kelly"]
+      "active_participants": ["Kelsey"]
     },
     "dialogue_history": {
-      "previous_speaker": "Kelly",
-      "last_utterance": "Dwayne, you'll freeze."
+      "previous_speaker": "Kelsey",
+      "last_utterance": "Dave, you'll freeze."
     }
   },
   {
@@ -44,10 +44,10 @@
     "metadata": {
       "time": "16:30",
       "location": "Living Room",
-      "active_participants": ["Kelly"]
+      "active_participants": ["Kelsey"]
     },
     "dialogue_history": {
-      "previous_speaker": "Kelly",
+      "previous_speaker": "Kelsey",
       "last_utterance": "For the night? Or just for a nap? Need air?"
     }
   },
@@ -57,7 +57,7 @@
     "metadata": {
       "time": "10:15",
       "location": "Living Room",
-      "active_participants": ["Kelly", "Nurse Sarah", "Dawn (iPad)"]
+      "active_participants": ["Kelsey", "Nurse Sarah", "Dawn (iPad)"]
     },
     "dialogue_history": {
       "previous_speaker": "Dawn",

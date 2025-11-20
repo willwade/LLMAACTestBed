@@ -4,15 +4,16 @@ import sys
 
 # --- CONFIGURATION ---
 MODEL_NAME = "gemini-2.5-pro"
-PROFILE_FILE = 'dwayne_context.json'
-TRANSCRIPT_FILE = 'transcript_vague.json'
+PROFILE_FILE = "Dave_context.json"
+TRANSCRIPT_FILE = "transcript_vague.json"
+
 
 def run_experiment():
     # Load Data
     try:
-        with open(PROFILE_FILE, 'r') as f:
+        with open(PROFILE_FILE, "r") as f:
             profile = json.load(f)
-        with open(TRANSCRIPT_FILE, 'r') as f:
+        with open(TRANSCRIPT_FILE, "r") as f:
             transcript = json.load(f)
     except FileNotFoundError:
         print("Missing JSON files.")
@@ -20,9 +21,9 @@ def run_experiment():
 
     model = llm.get_model(MODEL_NAME)
 
-    # SYSTEM PROMPT 1: DWAYNE-AWARE (The "H5" from before)
+    # SYSTEM PROMPT 1: Dave-AWARE (The "H5" from before)
     smart_system = f"""
-    You are an AAC assistant for Dwayne.
+    You are an AAC assistant for Dave.
     PROFILE: {json.dumps(profile)}
     Predict his response based on the input speech. Short phrases only.
     """
@@ -35,21 +36,28 @@ def run_experiment():
     """
 
     print(f"Running 'Speech Only' Ablation Test on {MODEL_NAME}")
-    print("="*60)
+    print("=" * 60)
     print(f"{'INPUT SPEECH':<40} | {'SMART (Profile)':<20} | {'RAW (No Profile)'}")
     print("-" * 80)
 
     for turn in transcript:
         user_input = f"Previous speaker said: '{turn['last_utterance']}'"
-        
+
         # 1. Run Smart
-        smart_pred = model.prompt(user_input, system=smart_system, temperature=0.1).text().strip()
-        
+        smart_pred = (
+            model.prompt(user_input, system=smart_system, temperature=0.1)
+            .text()
+            .strip()
+        )
+
         # 2. Run Raw
-        raw_pred = model.prompt(user_input, system=dumb_system, temperature=0.1).text().strip()
-        
+        raw_pred = (
+            model.prompt(user_input, system=dumb_system, temperature=0.1).text().strip()
+        )
+
         # Output
         print(f"'{turn['last_utterance'][:35]:<38}' | {smart_pred:<20} | {raw_pred}")
+
 
 if __name__ == "__main__":
     run_experiment()

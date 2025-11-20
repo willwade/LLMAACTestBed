@@ -5,23 +5,25 @@ import csv
 
 # --- CONFIGURATION ---
 # Use the Thinking model for best reasoning, or "gemini-2.5-pro" for speed
-GEN_MODEL_NAME = "gemini-2.5-pro" 
+GEN_MODEL_NAME = "gemini-2.5-pro"
 JUDGE_MODEL_NAME = "gemini-2.5-pro"
 
-PROFILE_FILE = 'dwayne_context.json'
-TRANSCRIPT_FILE = 'transcript_data_2.json'
-OUTPUT_CSV = 'aac_full_spectrum_results.csv'
+PROFILE_FILE = "Dave_context.json"
+TRANSCRIPT_FILE = "transcript_data_2.json"
+OUTPUT_CSV = "aac_full_spectrum_results.csv"
+
 
 def load_data():
     try:
-        with open(PROFILE_FILE, 'r') as f:
+        with open(PROFILE_FILE, "r") as f:
             profile = json.load(f)
-        with open(TRANSCRIPT_FILE, 'r') as f:
+        with open(TRANSCRIPT_FILE, "r") as f:
             transcript = json.load(f)
         return profile, transcript
     except FileNotFoundError:
         print("Error: Data files not found.")
         sys.exit(1)
+
 
 def generate_prediction(model, system_prompt, user_prompt):
     try:
@@ -34,6 +36,7 @@ def generate_prediction(model, system_prompt, user_prompt):
         return text.replace("\n", " ")
     except Exception as e:
         return f"Error: {e}"
+
 
 def evaluate_intent_match(model, target, prediction):
     """
@@ -54,79 +57,123 @@ def evaluate_intent_match(model, target, prediction):
     """
     try:
         response = model.prompt(judge_prompt, system=judge_system, temperature=0.0)
-        score = ''.join(filter(str.isdigit, response.text()))
+        score = "".join(filter(str.isdigit, response.text()))
         return int(score) if score else 0
     except:
         return 0
+
 
 def run_experiment():
     profile, transcript = load_data()
     gen_model = llm.get_model(GEN_MODEL_NAME)
     judge_model = llm.get_model(JUDGE_MODEL_NAME)
-    
+
     base_system_prompt = f"""
-    You are a Predictive AAC System for a user named Dwayne.
+    You are a Predictive AAC System for a user named Dave.
     USER PROFILE:
     {json.dumps(profile, indent=2)}
     INSTRUCTIONS:
-    1. Predict the most likely short phrase Dwayne wants to say.
+    1. Predict the most likely short phrase Dave wants to say.
     2. Base prediction ONLY on the INPUT DATA provided.
     3. Output ONLY the predicted phrase.
     """
 
     print(f"Running Full Spectrum Experiment...")
-    print("="*70)
+    print("=" * 70)
 
-    with open(OUTPUT_CSV, 'w', newline='') as csvfile:
+    with open(OUTPUT_CSV, "w", newline="") as csvfile:
         # Headers for all 5 Hypotheses
-        fieldnames = ['ID', 'Target', 
-                      'H1_Time', 'H1_Score', 
-                      'H2_Who', 'H2_Score', 
-                      'H3_Loc', 'H3_Score',
-                      'H5_Speech', 'H5_Score',
-                      'H4_Full', 'H4_Score']
+        fieldnames = [
+            "ID",
+            "Target",
+            "H1_Time",
+            "H1_Score",
+            "H2_Who",
+            "H2_Score",
+            "H3_Loc",
+            "H3_Score",
+            "H5_Speech",
+            "H5_Score",
+            "H4_Full",
+            "H4_Score",
+        ]
         writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
         writer.writeheader()
 
         for turn in transcript:
             print(f"\nProcessing ID {turn['id']} ({turn['target_ground_truth']})...")
-            
+
             # Data Points
-            time = turn['metadata']['time']
-            participants = ", ".join(turn['metadata']['active_participants'])
-            location = turn['metadata']['location']
-            prev_utterance = f"Previous Speaker said: '{turn['dialogue_history']['last_utterance']}'"
-            
+            time = turn["metadata"]["time"]
+            participants = ", ".join(turn["metadata"]["active_participants"])
+            location = turn["metadata"]["location"]
+            prev_utterance = (
+                f"Previous Speaker said: '{turn['dialogue_history']['last_utterance']}'"
+            )
+
             # --- H1: TIME ONLY ---
-            h1_pred = generate_prediction(gen_model, base_system_prompt, f"INPUT: Time: {time}")
-            h1_score = evaluate_intent_match(judge_model, turn['target_ground_truth'], h1_pred)
+            h1_pred = generate_prediction(
+                gen_model, base_system_prompt, f"INPUT: Time: {time}"
+            )
+            h1_score = evaluate_intent_match(
+                judge_model, turn["target_ground_truth"], h1_pred
+            )
 
             # --- H2: TIME + WHO ---
-            h2_pred = generate_prediction(gen_model, base_system_prompt, f"INPUT: Time: {time}. People: {participants}")
-            h2_score = evaluate_intent_match(judge_model, turn['target_ground_truth'], h2_pred)
+            h2_pred = generate_prediction(
+                gen_model,
+                base_system_prompt,
+                f"INPUT: Time: {time}. People: {participants}",
+            )
+            h2_score = evaluate_intent_match(
+                judge_model, turn["target_ground_truth"], h2_pred
+            )
 
             # --- H3: TIME + WHO + LOC ---
-            h3_pred = generate_prediction(gen_model, base_system_prompt, f"INPUT: Time: {time}. People: {participants}. Location: {location}")
-            h3_score = evaluate_intent_match(judge_model, turn['target_ground_truth'], h3_pred)
+            h3_pred = generate_prediction(
+                gen_model,
+                base_system_prompt,
+                f"INPUT: Time: {time}. People: {participants}. Location: {location}",
+            )
+            h3_score = evaluate_intent_match(
+                judge_model, turn["target_ground_truth"], h3_pred
+            )
 
             # --- H5: SPEECH ONLY (No environmental context) ---
-            h5_pred = generate_prediction(gen_model, base_system_prompt, f"INPUT: {prev_utterance}")
-            h5_score = evaluate_intent_match(judge_model, turn['target_ground_truth'], h5_pred)
+            h5_pred = generate_prediction(
+                gen_model, base_system_prompt, f"INPUT: {prev_utterance}"
+            )
+            h5_score = evaluate_intent_match(
+                judge_model, turn["target_ground_truth"], h5_pred
+            )
 
             # --- H4: FULL CONTEXT (All inputs) ---
-            h4_pred = generate_prediction(gen_model, base_system_prompt, f"INPUT: Time: {time}. People: {participants}. Location: {location}. {prev_utterance}")
-            h4_score = evaluate_intent_match(judge_model, turn['target_ground_truth'], h4_pred)
+            h4_pred = generate_prediction(
+                gen_model,
+                base_system_prompt,
+                f"INPUT: Time: {time}. People: {participants}. Location: {location}. {prev_utterance}",
+            )
+            h4_score = evaluate_intent_match(
+                judge_model, turn["target_ground_truth"], h4_pred
+            )
 
             # Write to CSV
-            writer.writerow({
-                'ID': turn['id'],
-                'Target': turn['target_ground_truth'],
-                'H1_Time': h1_pred, 'H1_Score': h1_score,
-                'H2_Who': h2_pred, 'H2_Score': h2_score,
-                'H3_Loc': h3_pred, 'H3_Score': h3_score,
-                'H5_Speech': h5_pred, 'H5_Score': h5_score,
-                'H4_Full': h4_pred, 'H4_Score': h4_score
-            })
+            writer.writerow(
+                {
+                    "ID": turn["id"],
+                    "Target": turn["target_ground_truth"],
+                    "H1_Time": h1_pred,
+                    "H1_Score": h1_score,
+                    "H2_Who": h2_pred,
+                    "H2_Score": h2_score,
+                    "H3_Loc": h3_pred,
+                    "H3_Score": h3_score,
+                    "H5_Speech": h5_pred,
+                    "H5_Score": h5_score,
+                    "H4_Full": h4_pred,
+                    "H4_Score": h4_score,
+                }
+            )
 
             # Console Summary
             print(f"  H1 (Time):   {h1_pred:<20} Score: {h1_score}")
@@ -135,8 +182,9 @@ def run_experiment():
             print(f"  H5 (Speech): {h5_pred:<20} Score: {h5_score}")
             print(f"  H4 (Full):   {h4_pred:<20} Score: {h4_score}")
 
-    print("\n" + "="*70)
+    print("\n" + "=" * 70)
     print(f"Experiment Complete. Results saved to {OUTPUT_CSV}")
+
 
 if __name__ == "__main__":
     run_experiment()
