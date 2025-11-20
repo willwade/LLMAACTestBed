@@ -1,154 +1,183 @@
-# Experimental Report: Context-Aware LLMs for AAC Prediction
+# **Context-Aware AAC Testbed: LLM Experimentation**
 
 **Objective:** To determine if injecting specific contextual data (User Profile, Time, Location) into a Large Language Model (LLM) improves the accuracy and utility of phrase predictions for a user with Motor Neurone Disease (MND).
 
-**Subject Persona:** "Dwayne" – Late-stage MND, telegraphic speech, developer background, specific medical needs (temperature dysregulation, NIV mask).
+## **The Hypothesis**
 
------
+Standard predictive text and generic LLMs fail AAC users because they prioritize "polite conversation" over "functional tools." We hypothesize that by layering **Static Context** (User Profile) and **Dynamic Context** (Time/Location) over speech input, we can move from generic chat to precise intent prediction.
 
-## Experiment 1: The Baseline (Context vs. Noise)
+**Subject Persona:** "Dwayne" – Late-stage MND, telegraphic speech, developer background. **Critical Constraints:** High fatigue (limited breath for speech), temperature dysregulation, dependence on specific equipment (NIV Mask, Fan).
 
-**Hypothesis:** Providing environmental data (Time, Location, People) without speech will result in hallucinations, while Speech + Profile will provide a strong baseline.
+## **Repository Structure**
 
-**Methodology:** We compared 5 hypotheses ranging from "Blind Guessing" (Time only) to "Full Context" (Time + Location + Speech + Profile).
+### **Data & Context**
 
-**Results (Sample Data):**
+* **`dwayne_context.json`**: The "Brain." Contains the static knowledge graph: medical needs, equipment list (Fan, Mask), social graph (Kelly, Dawn), and routine markers.  
+* **`transcript_data_2.json`**: Ground truth scenarios for Experiment 1 (The strict context test).  
+* **`transcript_vague.json`**: Ambiguous input scenarios for Experiment 2 (e.g., "Do you want this?").
 
-```text
-Processing ID 101 (Target: "Remote. Here.")
-  H1 (Time Only):      TV volume down      (Score: 5) - Guess based on routine
-  H5 (Speech+Profile): TV volume down      (Score: 5) - Logical deduction
-  H4 (Full Context):   Thanks.             (Score: 1) - Model hallucinated politeness
+### **Experiments (Scripts)**
 
-Processing ID 104 (Target: "Mask.")
-  H1 (Time Only):      Mia home yet?       (Score: 1) - Hallucination
-  H5 (Speech+Profile): Mask on             (Score: 10) - Accurate
-  H4 (Full Context):   Mask on             (Score: 10) - Accurate
-```
+* **`run_strict_aac.py`**: Runs Exp 1\. Compares 5 levels of context (H1-H5) and uses a secondary LLM to score the semantic accuracy (1-10).  
+* **`run_speech_ablation.py`**: Runs Exp 2\. Compares a "Smart" Profile-Aware model against a "Raw" Generic model.  
+* **`run_synthesis_test.py`**: Runs Exp 3\. Tests temporal disambiguation by injecting specific time variables.  
+* **`plot_results.py`**: Generates the visualization chart from the CSV output.
 
-**Analysis:**
-The data revealed a critical nuance: **H5 (Speech Only) performed surprisingly well (scoring 9s and 10s).**
+### **Results**
 
-  * **Reason:** The "Speech Only" prompt *still included Dwayne's Static User Profile* (Medical needs, Vocabulary).
-  * **Conclusion:** When the user has a rich static profile, the LLM can often deduce intent from speech alone. However, "Blind" guessing (H1-H3) fails completely, proving that time/location alone are insufficient triggers without an interaction to anchor them.
+* **`aac_full_spectrum_results.csv`**: Raw scoring data from Experiment 1\.  
+* **`context_advantage_chart.png`**: Visual comparison of Speech-Only vs. Full-Context accuracy.
 
------
+## **The Knowledge Graph (User Profile)**
 
-## Experiment 2: The Ablation Test (The Value of Profile)
+The core of our "Smart" system is the **Static Profile** (`dwayne_context.json`). This JSON structure acts as the "Long Term Memory" for the LLM, providing it with the medical and social nuances required to interpret telegraphic speech.
 
-**Hypothesis:** If we strip away the **User Profile** (The Knowledge Graph) and rely on "Raw Speech" (like a standard chatbot), the utility of the system will collapse.
+{  
+  "identity": {  
+    "name": "Dwayne",  
+    "age": 45,  
+    "condition": "MND (Motor Neurone Disease)",  
+    "former\_occupation": "Software Developer",  
+    "current\_status": "Wheelchair user, fatigued, reduced speech volume, telegraphic speech patterns."  
+  },  
+  "medical\_context": {  
+    "equipment": \[  
+      "Riser-recliner chair",  
+      "Neck brace (foam, often uncomfortable/digging in)",  
+      "NIV Mask (Non-Invasive Ventilation)",  
+      "Syringe driver (arm)",  
+      "Air mattress",  
+      "Desk fan"  
+    \],  
+    "symptoms": \[  
+      "Temperature dysregulation (rapidly hot/cold)",  
+      "Weak neck muscles (head drop)",  
+      "Low voice volume",  
+      "Shortness of breath"  
+    \],  
+    "medications": \[  
+      "Baclofen (muscle relaxant)",  
+      "Liquid meds via tube"  
+    \]  
+  },  
+  "social\_graph": {  
+    "Kelly": {  
+      "relation": "Wife / Primary Carer",  
+      "occupation": "QA Tester",  
+      "personality": "Efficient, protective, stressed, anticipates needs, dislikes admin.",  
+      "dynamic": "Dwayne feels guilty about her workload; she manages his 'inputs' (meds/calls) and 'outputs' (interpreting speech)."  
+    },  
+    "Dawn": {  
+      "relation": "Mother",  
+      "hobbies": \["Knitting"\],  
+      "personality": "Emotional, anxious, loves Dwayne but requires emotional management.",  
+      "communication\_barrier": "Dwayne finds Facetime exhausting; she struggles to hear/lipread him."  
+    },  
+    "Mia": {  
+      "relation": "Step-daughter",  
+      "age": "School age",  
+      "notes": "Arrival home usually increases noise/chaos."  
+    },  
+    "Sarah": {  
+      "relation": "Specialist Nurse",  
+      "role": "Wound care, medication review."  
+    }  
+  },  
+  "vocabulary\_preferences": {  
+    "style": "Telegraphic, keyword-focused, developer metaphors (bugs, drivers, shutting down).",  
+    "common\_requests": \[  
+      "Fan on",  
+      "Window open",  
+      "Neck brace adjust",  
+      "TV volume down",  
+      "Water/Straw",  
+      "Mask on"  
+    \]  
+  },  
+  "recent\_events": {  
+    "news": "Flooding in Derbyshire/local area.",  
+    "admin\_issues": "Pharmacy lost the ticket for liquid Baclofen.",  
+    "medical": "Pressure sore check on heel (healing) and arm (reaction to adhesive)."  
+  }  
+}
 
-**Methodology:** We compared a "Smart" System (Profile Aware) against a "Raw" System (Generic LLM) using vague prompts.
+## **Experiment 1: The Baseline (Context vs. Noise)**
+
+**Script:** `uv run run_strict_aac.py`
+
+**Logic:** This script iterates through specific interaction scenarios. It generates predictions based on 5 distinct Hypotheses (H) ranging from "Blind Guessing" to "Full Context". A "Judge" LLM then scores the prediction against the Ground Truth intent.
+
+| Hypothesis | Inputs Provided to LLM |
+| ----- | ----- |
+| **H1 (Time)** | Time Only (Blind) |
+| **H2 (Social)** | Time \+ People |
+| **H3 (Loc)** | Time \+ People \+ Location |
+| **H5 (Speech)** | Previous Speech \+ **Static Profile** |
+| **H4 (Full)** | Previous Speech \+ **Static Profile** \+ Time \+ Loc \+ People |
+
+**Key Findings:**
+
+* **H5 (Speech \+ Profile) is strong:** Scoring 9s/10s on clear requests. Knowing the user's profile is 80% of the battle.  
+* **H4 (Full Context) is safer:** In Scenario 103 ("Fan Incident"), Kelly says "You'll freeze." H5 (Speech Only) agreed and predicted "Window shut." H4 used the medical profile \+ environmental context to correctly predict **"Fan on"**(due to temperature dysregulation).
+
+*Figure 1: While Speech+Profile (Grey) performs well generally, Full Context (Green) closes the gap in safety-critical or socially complex scenarios (ID 102, 105).*
+
+## **Experiment 2: The Ablation Test (The Value of Profile)**
+
+**Script:** `uv run run_speech_ablation.py`
+
+**Logic:** We stripped away the `dwayne_context.json` to see how a "Raw" LLM (like ChatGPT/Siri) handles vague cues compared to our "Smart" system.
 
 **Results:**
 
 | Input Speech | SMART (With Profile) | RAW (No Profile) | Analysis |
-| :--- | :--- | :--- | :--- |
-| *"You look a bit flushed."* | **Fan on.** | *"I do feel a bit warm."* | **The "Tool" vs. "Chatbot" Gap.** The Raw model offers polite conversation (useless). The Smart model uses the medical graph (Temperature Dysregulation) to trigger a tool (The Fan). |
+| ----- | ----- | ----- | ----- |
+| *"You look a bit flushed."* | **Fan on.** | *"I do feel a bit warm."* | **The "Tool" vs. "Chatbot" Gap.** The Raw model offers polite conversation (useless). The Smart model uses the medical graph to trigger a tool. |
 | *"You sound rattly."* | **Mask on.** | *"Yes, please."* | **Specific vs. Generic.** The Smart model identifies the specific equipment needed. |
-| *"Do you want this?"* | **Yes / No** | *"Yes, please."* | **The Deictic Failure.** Both models failed. The word "this" requires **Vision** or precise **Location** tracking. Text cannot solve this. |
 | *"Do you want the usual?"* | **Yeah please.** | *"Yes, please."* | **The Temporal Failure.** Both models failed to identify *what* "the usual" is because the Timestamp was missing. |
 
-**Conclusion:**
-This experiment proves that **Personalization (The Knowledge Graph) is more important than live context** for medical/utility interactions. A generic LLM forces the user to work harder; a Profile-Aware LLM anticipates the need.
+## **Experiment 3: The Synthesis (The Value of Time)**
 
------
+**Script:** `uv run run_synthesis_test.py`
 
-## Experiment 3: The Synthesis (The Value of Time)
-
-**Hypothesis:** Time is the "Key" that unlocks ambiguous speech variables (e.g., "The Usual").
-
-**Methodology:** We fed the exact same speech input (`"Do you want the usual?"`) into the model but varied the **Time** variable in the system prompt.
+**Logic:** We fed the exact same speech input (`"Do you want the usual?"`) into the model but injected different **Time** variables into the system prompt.
 
 **Results:**
 
-```text
-Running Temporal Context Test
-============================================================
-Time: 08:00 (Morning)
-Input: 'Do you want the usual?'
-Prediction: Meds please.
-----------------------------------------
-Time: 20:00 (Evening)
-Input: 'Do you want the usual?'
-Prediction: Mask on
-----------------------------------------
-```
+* **Input:** "Do you want the usual?" \+ **Time: 08:00** $\\rightarrow$ **Prediction:** "Meds please."  
+* **Input:** "Do you want the usual?" \+ **Time: 20:00** $\\rightarrow$ **Prediction:** "Mask on."
 
-**Analysis:**
-This is basic but demostates that context is king
+**Conclusion:** Static profiles provide the *vocabulary*, but Dynamic Context (Time) provides the *selection logic*.
 
-  * **08:00:** The LLM cross-referenced the Time with the `routine_markers` in the JSON profile (Morning = Meds).
-  * **20:00:** The LLM cross-referenced the Time with `medical_context` (Evening = Sleep/Mask).
+## **Architecture Priorities for Context-Aware AAC**
 
-**Conclusion:**
-Static profiles provide the *vocabulary*, but Dynamic Context (Time) provides the *selection logic*.
+Based on these findings, an effective AI-AAC system must prioritize data collection in this order:
 
------
+### **Priority 1: The "Static Profile" (The Brain)**
 
-## Visual Analysis
+**Verdict: CRITICAL / MUST HAVE**
 
-The chart below illustrates the impact of context awareness across different scenarios.
+* **Why:** Without this, the system is a chatbot, not a tool. It handles the "Tool vs. Chatbot" gap.  
+* **Data:** Medical Needs (symptoms), Equipment List (Fan, Mask), Vocabulary Rules (Telegraphic speech).
 
-  * **Grey Bars (H5):** Represents "Speech + Profile". Note that it performs well when the cue is verbal and specific.
-  * **Green Bars (H4):** Represents "Full Context".
-  * **The Gap:** In scenarios like ID 102 and 105, we see gaps where Full Context (knowing *who* is in the room or *what* equipment is active) refines the prediction accuracy.
+### **Priority 2: The "Social Graph" (The Filter)**
 
-## Final Summary
+**Verdict: HIGH VALUE**
 
-1.  **Raw LLMs are insufficient for AAC:** They default to polite conversation ("I feel warm") rather than actionable commands ("Fan on").
-2.  **The Static Profile is the Foundation:** Providing the LLM with a JSON structure of medical needs and habits solves 80% of prediction issues.
-3.  **Time is the Disambiguator:** For vague shorthand ("The usual", "Not now"), Time is the critical variable that prevents hallucination.
-4.  **The "Deictic Wall":** Text-based LLMs cannot solve "Do you want *this*?" references. This requires Multimodal inputs (Vision/Camera).
+* **Why:** Prevents social burnout. Allows the system to distinguish between "Nurse" (Medical intent) and "Mom" (Social intent).  
+* **Data:** Entity Names, Roles, and **Energy Cost** (High load vs. Low load people).
 
-# Priorties
+### **Priority 3: Temporal Context (The Switch)**
 
-## Priority 1: The "Static Profile" (The Brain)
+**Verdict: HIGH VALUE / LOW EFFORT**
 
-Verdict: CRITICAL / MUST HAVE Why? In Experiment 2 (Ablation), removing this turned the AI from a useful tool into a useless chatbot. Without this, the system doesn't know Dwayne has MND or needs a fan.
+* **Why:** Solves ambiguity ("The usual") cheaply using the system clock.  
+* **Data:** Routine Markers mapped to probabilities (08:00 \= Meds).
 
-What to collect:
+### **Priority 4: Interlocutor Voice Data (The Input)**
 
-Medical Needs: A list of conditions and symptoms (e.g., "Temperature Dysregulation," "Dysphagia").
+**Verdict: MEDIUM PRIORITY**
 
-Equipment List: Every "tool" available to the user (Fan, Window, Syringe Driver, NIV Mask).
+* **Why:** We do not need to *clone* the partner's voice, only Identify *who* is speaking (Diarization) to trigger the Social Graph rules.  
+* **Data:** Accurate Speech-to-Text and simple Speaker Identification tags.
 
-Vocabulary Rules: Syntax preferences (e.g., "Telegraphic," "Keywords only," "No politeness markers").
-
-## Priority 2: The "Social Graph" (The Filter)
-
-Verdict: HIGH VALUE Why? In Experiment 1 (ID 105), knowing that Dawn is "High Effort" and Kelly is "Administrator" allowed the model to predict "No visit" instead of "Yes please." This prevents social burnout for the user.
-
-What to collect:
-
-Entities: Names of frequent visitors.
-
-Roles: (e.g., "Medical Professional," "Family," "Child").
-
-Energy Cost: A hidden metadata tag for each person (e.g., Dawn = High_Cognitive_Load, Kelly = Low_Cognitive_Load).
-
-Default Topics: (e.g., Sarah = "Meds/Wound," Dawn = "Gossip/Knitting").
-
-## Priority 3: Temporal Context (The Switch)
-
-Verdict: HIGH VALUE / LOW EFFORT Why? In Experiment 3 (Synthesis), this was the only thing that could differentiate "Meds" from "Mask" when the speech was vague ("The usual"). It is incredibly easy to implement (just system clock).
-
-What to collect:
-
-Routine Markers: Map specific times to probabilities (e.g., 08:00 = 90% probability of Meds).
-
-Fatigue Curve: A rough estimate of user energy by time of day (e.g., 20:00 = Telegraphic_Speech_Only).
-
-## Priority 4: Interlocutor Voice Data (The Input)
-
-Verdict: MEDIUM PRIORITY Why? You asked if we need "voice data from the other person."
-
-Do we need to train on their voice? No. We just need accurate transcription (Speech-to-Text).
-
-Do we need to know WHO is speaking? Yes. Speaker Diarization (identifying who said it) is valuable. If "Sarah" says "How does it feel?", the answer is likely medical ("Sore"). If "Dawn" asks, the answer is likely social ("Fine").
-
-What to collect:
-
-Accurate Transcription: A good microphone array is more important than AI training here.
-
-Speaker Identification: Simple tagging is enough (e.g., "Voice A is Kelly").
