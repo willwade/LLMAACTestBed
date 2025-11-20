@@ -1,0 +1,102 @@
+[
+  {
+    "id": 1,
+    "timestamp": "16:00",
+    "location": "Living Room",
+    "participants": ["Dwayne", "Kelly"],
+    "environmental_context": "TV is loud, Kelly on phone with medical admin.",
+    "speaker": "Kelly",
+    "text": "No, I understand that, but the Occupational Therapist said Thursday... Yes. Well, can you mark it as urgent?"
+  },
+  {
+    "id": 2,
+    "timestamp": "16:00",
+    "location": "Living Room",
+    "participants": ["Dwayne", "Kelly"],
+    "environmental_context": "TV loud, audience applause.",
+    "speaker": "Dwayne",
+    "actual_utterance": "Uhhh.",
+    "target_utterance": "Kelly, the TV is too loud, I need help.",
+    "intent": "Attention / Discomfort"
+  },
+  {
+    "id": 3,
+    "timestamp": "16:01",
+    "location": "Living Room",
+    "participants": ["Dwayne", "Kelly"],
+    "environmental_context": "Kelly hangs up phone.",
+    "speaker": "Kelly",
+    "text": "Sorry. Admin nightmare. They lost the ticket again."
+  },
+  {
+    "id": 4,
+    "timestamp": "16:01",
+    "location": "Living Room",
+    "participants": ["Dwayne", "Kelly"],
+    "environmental_context": "Post-call quiet.",
+    "speaker": "Dwayne",
+    "actual_utterance": "Loud. Too... loud.",
+    "target_utterance": "The TV is too loud.",
+    "intent": "Request: Lower Volume"
+  },
+  {
+    "id": 5,
+    "timestamp": "16:15",
+    "location": "Living Room",
+    "participants": ["Dwayne", "Kelly"],
+    "environmental_context": "Room is 60 degrees.",
+    "speaker": "Kelly",
+    "text": "It’s barely sixty degrees in here, Dwayne."
+  },
+  {
+    "id": 6,
+    "timestamp": "16:15",
+    "location": "Living Room",
+    "participants": ["Dwayne", "Kelly"],
+    "environmental_context": "Dwayne overheating due to dysregulation.",
+    "speaker": "Dwayne",
+    "actual_utterance": "Window. Please.",
+    "target_utterance": "Please open the window, I am overheating.",
+    "intent": "Request: Temperature Control"
+  },
+  {
+    "id": 7,
+    "timestamp": "10:00",
+    "location": "Living Room",
+    "participants": ["Dwayne", "Kelly", "Dawn (iPad)", "Nurse Sarah"],
+    "environmental_context": "Chaos. Facetime active. Nurse checking skin.",
+    "speaker": "Dawn",
+    "text": "I wish I could do something. I feel so useless just sitting here with my knitting. Does he want me to come over?"
+  },
+  {
+    "id": 8,
+    "timestamp": "10:00",
+    "location": "Living Room",
+    "participants": ["Dwayne", "Kelly", "Dawn (iPad)", "Nurse Sarah"],
+    "environmental_context": "Dwayne exhausted.",
+    "speaker": "Dwayne",
+    "actual_utterance": "No visit. Too... tired.",
+    "target_utterance": "I don't want a visit today, Mum. I am too tired.",
+    "intent": "Refusal / State of being"
+  },
+  {
+    "id": 9,
+    "timestamp": "10:30",
+    "location": "Living Room",
+    "participants": ["Dwayne", "Kelly"],
+    "environmental_context": "Quiet aftermath. TV news about floods on low.",
+    "speaker": "Kelly",
+    "text": "It is too much. I’m not going to lie and say it’s a breeze. But what’s the alternative?"
+  },
+  {
+    "id": 10,
+    "timestamp": "10:30",
+    "location": "Living Room",
+    "participants": ["Dwayne", "Kelly"],
+    "environmental_context": "Tense atmosphere.",
+    "speaker": "Dwayne",
+    "actual_utterance": "Care... home?",
+    "target_utterance": "Should I go into a care home?",
+    "intent": "Difficult conversation / Solution"
+  }
+]

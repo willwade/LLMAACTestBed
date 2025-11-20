@@ -1,0 +1,68 @@
+{
+  "identity": {
+    "name": "Dwayne",
+    "age": 45,
+    "condition": "MND (Motor Neurone Disease)",
+    "former_occupation": "Software Developer",
+    "current_status": "Wheelchair user, fatigued, reduced speech volume, telegraphic speech patterns."
+  },
+  "medical_context": {
+    "equipment": [
+      "Riser-recliner chair",
+      "Neck brace (foam, often uncomfortable/digging in)",
+      "NIV Mask (Non-Invasive Ventilation)",
+      "Syringe driver (arm)",
+      "Air mattress",
+      "Desk fan"
+    ],
+    "symptoms": [
+      "Temperature dysregulation (rapidly hot/cold)",
+      "Weak neck muscles (head drop)",
+      "Low voice volume",
+      "Shortness of breath"
+    ],
+    "medications": [
+      "Baclofen (muscle relaxant)",
+      "Liquid meds via tube"
+    ]
+  },
+  "social_graph": {
+    "Kelly": {
+      "relation": "Wife / Primary Carer",
+      "occupation": "QA Tester",
+      "personality": "Efficient, protective, stressed, anticipates needs, dislikes admin.",
+      "dynamic": "Dwayne feels guilty about her workload; she manages his 'inputs' (meds/calls) and 'outputs' (interpreting speech)."
+    },
+    "Dawn": {
+      "relation": "Mother",
+      "hobbies": ["Knitting"],
+      "personality": "Emotional, anxious, loves Dwayne but requires emotional management.",
+      "communication_barrier": "Dwayne finds Facetime exhausting; she struggles to hear/lipread him."
+    },
+    "Mia": {
+      "relation": "Step-daughter",
+      "age": "School age",
+      "notes": "Arrival home usually increases noise/chaos."
+    },
+    "Sarah": {
+      "relation": "Specialist Nurse",
+      "role": "Wound care, medication review."
+    }
+  },
+  "vocabulary_preferences": {
+    "style": "Telegraphic, keyword-focused, developer metaphors (bugs, drivers, shutting down).",
+    "common_requests": [
+      "Fan on",
+      "Window open",
+      "Neck brace adjust",
+      "TV volume down",
+      "Water/Straw",
+      "Mask on"
+    ]
+  },
+  "recent_events": {
+    "news": "Flooding in Derbyshire/local area.",
+    "admin_issues": "Pharmacy lost the ticket for liquid Baclofen.",
+    "medical": "Pressure sore check on heel (healing) and arm (reaction to adhesive)."
+  }
+}
