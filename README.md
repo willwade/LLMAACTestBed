@@ -1,5 +1,31 @@
 # **Context-Aware AAC Testbed: LLM Experimentation**
 
+## Quick Start
+
+### For Local Development:
+```bash
+# Install dependencies
+pip install -r requirements.txt
+
+# Set your API key
+export LLM_GEMINI_KEY="your-api-key-here"
+
+# Run experiments via Python scripts
+python run_strict_aac.py
+python run_speech_ablation.py
+python run_synthesis_test.py
+
+# OR use the local Jupyter notebook
+jupyter notebook ContextAACNotebook_Local.ipynb
+```
+
+### For Google Colab:
+1. Upload `ContextAACNotebook.ipynb` to Colab
+2. Add your `GEMINI_API_KEY` to Colab Secrets (🔑 icon in sidebar)
+3. Run all cells
+
+---
+
 ## "Explain it to me like I'm a .net developer section"
 
 The Client: "Dave" (MND patient). High latency input (speaking is hard), critical SLA (needs air/meds immediately).

@@ -1,0 +1,7 @@
+llm
+llm-gemini
+pandas
+matplotlib
+seaborn
+tenacity
+
