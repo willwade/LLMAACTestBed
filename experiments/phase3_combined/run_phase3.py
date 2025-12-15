@@ -9,6 +9,7 @@ import argparse
 import sys
 import importlib
 from pathlib import Path
+from typing import Any
 
 # Add project root to path for lib imports
 project_root = Path(__file__).parent.parent.parent
@@ -48,9 +49,9 @@ def main():
             ProfileEnhancedExperiment = getattr(profile_module, "ProfileEnhancedExperiment")
             profile_config = args.config or str(Path(__file__).parent / "configs" / "profile_enhanced.yaml")
             exp = ProfileEnhancedExperiment(profile_config, args.provider, args.model, max_chats=20)
-            results = exp.run_experiment()
-            exp.save_results(results, args.output)
-            print(f"[ok] Profile-Enhanced completed. Results: {len(results.get('enhanced_scores', []))} evaluations")
+            profile_results = exp.run_experiment()
+            exp.save_results(profile_results, args.output)
+            print(f"[ok] Profile-Enhanced completed. Results: {len(profile_results.get('enhanced_scores', []))} evaluations")
         except Exception as e:
             print(f"[error] Profile-Enhanced failed: {e}")
 
@@ -62,9 +63,9 @@ def main():
             social_module = importlib.import_module("social_context")
             SocialContextExperiment = getattr(social_module, "SocialContextExperiment")
             exp = SocialContextExperiment(args.config, args.provider, max_chats=20)
-            results = exp.run_experiment()
-            exp.save_results(results, args.output)
-            print(f"[ok] Social Context completed. Results: {len(results.get('social_scores', []))} evaluations")
+            social_results = exp.run_experiment()
+            exp.save_results(social_results, args.output)
+            print(f"[ok] Social Context completed. Results: {len(social_results.get('social_scores', []))} evaluations")
         except Exception as e:
             print(f"[error] Social Context failed: {e}")
 
@@ -85,8 +86,51 @@ User: Dave (MND patient)
         response = client.generate(prompt, temperature=0.2)
         print(f"[ok] Profile-aware generation: {response[:50]}...")
 
+    # Generate basic plots if results are available
+    try:
+        _plot_phase3_results(
+            locals().get("profile_results"),
+            locals().get("social_results"),
+            Path(args.output) if args.output else Path(".") / "results"
+        )
+    except Exception:
+        pass
+
     print("\n[done] Phase 3 experiments completed!")
 
 
 if __name__ == "__main__":
     main()
+def _plot_phase3_results(profile_results: dict[str, Any] | None, social_results: dict[str, Any] | None, output_root: Path) -> None:
+    """Generate simple plots for Phase 3 outputs."""
+    try:
+        import matplotlib
+
+        matplotlib.use("Agg")
+        import matplotlib.pyplot as plt
+        import seaborn as sns
+
+        figs_dir = output_root / "figures"
+        figs_dir.mkdir(parents=True, exist_ok=True)
+
+        if profile_results and "improvements" in profile_results:
+            plt.figure(figsize=(6, 4))
+            sns.histplot(profile_results["improvements"], bins=10, kde=False)
+            plt.title("Profile-Enhanced: Improvement Distribution")
+            plt.xlabel("Improvement")
+            plt.ylabel("Count")
+            plt.tight_layout()
+            plt.savefig(figs_dir / "profile_improvements.png", dpi=200)
+            plt.close()
+
+        if social_results and "improvements" in social_results:
+            plt.figure(figsize=(6, 4))
+            sns.histplot(social_results["improvements"], bins=10, kde=False)
+            plt.title("Social Context: Improvement Distribution")
+            plt.xlabel("Improvement")
+            plt.ylabel("Count")
+            plt.tight_layout()
+            plt.savefig(figs_dir / "social_improvements.png", dpi=200)
+            plt.close()
+    except Exception:
+        return

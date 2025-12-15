@@ -15,6 +15,41 @@ sys.path.insert(0, str(project_root))
 
 # Import centralized utilities
 from lib.utils import load_env, setup_logging, create_output_directory
+
+
+def _generate_plots(results_df, output_dir: Path) -> None:
+    """Generate simple summary plots for Phase 1."""
+    try:
+        import matplotlib
+
+        matplotlib.use("Agg")
+        import matplotlib.pyplot as plt
+        import seaborn as sns
+
+        output_dir.mkdir(parents=True, exist_ok=True)
+
+        # Histogram of judge scores
+        plt.figure(figsize=(6, 4))
+        sns.histplot(results_df["llm_judge_score"], bins=10, kde=False)
+        plt.title("LLM Judge Score Distribution")
+        plt.xlabel("Score")
+        plt.ylabel("Count")
+        plt.tight_layout()
+        plt.savefig(output_dir / "judge_score_distribution.png", dpi=200)
+        plt.close()
+
+        # Boxplot of embedding similarity by generation method
+        plt.figure(figsize=(8, 4))
+        sns.boxplot(data=results_df, x="generation_method", y="embedding_similarity")
+        plt.title("Embedding Similarity by Generation Method")
+        plt.xlabel("Generation Method")
+        plt.ylabel("Embedding Similarity")
+        plt.tight_layout()
+        plt.savefig(output_dir / "embedding_similarity_by_method.png", dpi=200)
+        plt.close()
+    except Exception:
+        # Plots are optional; ignore failures
+        return
 from experiments.phase1_chat_history.evaluation.chat_evaluator import Phase1ChatEvaluator
 
 
@@ -73,6 +108,10 @@ def main():
 
         evaluator.save_results(results, str(output_path))
         print(f"[ok] Results saved to: {output_path}")
+        # Plots
+        if isinstance(results, object) and hasattr(results, "to_csv"):
+            plot_dir = output_path.parent if output_path.suffix else output_path
+            _generate_plots(results, Path(plot_dir) / "figures")
 
         # Print summary
         print("\nSummary:")
