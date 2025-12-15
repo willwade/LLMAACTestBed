@@ -185,6 +185,7 @@ def generate_summary_report(all_results: dict[str, Any], output_dir: Path, llm_i
     }
 
     # Calculate summary statistics
+    baseline_mean = None
     for part_name, results in all_results.items():
         if "scores" in results and results["scores"]:
             scores = results["scores"]
@@ -196,13 +197,55 @@ def generate_summary_report(all_results: dict[str, Any], output_dir: Path, llm_i
                 "scores_over_7": sum(1 for s in scores if s >= 7),
                 "accuracy_over_70_percent": sum(1 for s in scores if s >= 7) / len(scores) * 100
             }
+            if part_name == "part1_baseline":
+                baseline_mean = summary["summary_statistics"][part_name]["mean_score"]
+        # Handle contextual part with nested scores
+        elif part_name == "part2_contextual" and "context_levels" in results:
+            level_means = {}
+            all_scores = []
+            for level_name, level_data in results["context_levels"].items():
+                scores = level_data.get("scores", [])
+                if scores:
+                    mean_score = sum(scores) / len(scores)
+                    level_means[level_name] = mean_score
+                    all_scores.extend(scores)
+            if all_scores:
+                summary["summary_statistics"][part_name] = {
+                    "total_tests": len(all_scores),
+                    "mean_score": sum(all_scores) / len(all_scores),
+                    "max_score": max(all_scores),
+                    "min_score": min(all_scores),
+                    "scores_over_7": sum(1 for s in all_scores if s >= 7),
+                    "accuracy_over_70_percent": sum(1 for s in all_scores if s >= 7) / len(all_scores) * 100,
+                    "level_means": level_means,
+                }
+                if baseline_mean is not None:
+                    summary["summary_statistics"][part_name]["deltas_vs_baseline"] = {
+                        lvl: (mean - baseline_mean) for lvl, mean in level_means.items()
+                    }
+        # Handle single keyword test
+        elif part_name == "part3_single_keyword" and "keyword_results" in results:
+            scores = []
+            for data in results["keyword_results"].values():
+                scores.extend(data.get("scores", []))
+            if scores:
+                summary["summary_statistics"][part_name] = {
+                    "total_tests": len(scores),
+                    "mean_score": sum(scores) / len(scores),
+                    "max_score": max(scores),
+                    "min_score": min(scores),
+                    "scores_over_7": sum(1 for s in scores if s >= 7),
+                    "accuracy_over_70_percent": sum(1 for s in scores if s >= 7) / len(scores) * 100,
+                }
+                if baseline_mean is not None:
+                    summary["summary_statistics"][part_name]["delta_vs_baseline"] = summary["summary_statistics"][part_name]["mean_score"] - baseline_mean
 
     # Save summary
     summary_file = output_dir / "experiment_summary.json"
     with open(summary_file, 'w') as f:
         json.dump(summary, f, indent=2)
 
-    print(f"\n📊 Summary report saved to: {summary_file}")
+    print(f"\n[summary] Report saved to: {summary_file}")
 
     # Print summary to console
     print("\n=== EXPERIMENT SUMMARY ===")
@@ -213,6 +256,14 @@ def generate_summary_report(all_results: dict[str, Any], output_dir: Path, llm_i
             print(f"  Total tests: {stats['total_tests']}")
             print(f"  Mean score: {stats['mean_score']:.2f}/10")
             print(f"  Accuracy (>7/10): {stats['accuracy_over_70_percent']:.1f}%")
+            if "level_means" in stats:
+                print("  Context level means:")
+                for lvl, mean in stats["level_means"].items():
+                    delta = stats.get("deltas_vs_baseline", {}).get(lvl)
+                    delta_str = f" (delta vs baseline {delta:+.2f})" if delta is not None else ""
+                    print(f"    - {lvl}: {mean:.2f}{delta_str}")
+            if "delta_vs_baseline" in stats:
+                print(f"  Δ vs baseline: {stats['delta_vs_baseline']:+.2f}")
 
 
 def main():
@@ -245,6 +296,26 @@ def main():
 
     # Load data
     keywords_df = pd.read_csv(keywords_file, sep='\t')
+    # Normalize column names from real TSV (remove trailing spaces)
+    keywords_df = keywords_df.rename(columns=lambda c: c.strip())
+    # Standardize instruction column
+    if "Instruction" not in keywords_df.columns and "Instruction " in keywords_df.columns:
+        keywords_df = keywords_df.rename(columns={"Instruction ": "Instruction"})
+    # Standardize keyword columns
+    if "Key word " in keywords_df.columns and "Key word" not in keywords_df.columns:
+        keywords_df = keywords_df.rename(columns={"Key word ": "Key word"})
+    if "Key Word2 " in keywords_df.columns and "Key Word2" not in keywords_df.columns:
+        keywords_df = keywords_df.rename(columns={"Key Word2 ": "Key Word2"})
+    if "Key Word3 " in keywords_df.columns and "Key Word3" not in keywords_df.columns:
+        keywords_df = keywords_df.rename(columns={"Key Word3 ": "Key Word3"})
+
+    # Drop rows without instruction or without any keywords
+    keywords_df = keywords_df.dropna(subset=["Instruction"])
+    keywords_df["Instruction"] = keywords_df["Instruction"].astype(str).str.strip()
+    keywords_df = keywords_df[keywords_df["Instruction"] != ""]
+    keyword_cols = ["Key word", "Key Word2", "Key Word3"]
+    keywords_df = keywords_df.dropna(how="all", subset=[c for c in keyword_cols if c in keywords_df.columns])
+
     logger.info(f"Loaded {len(keywords_df)} keyword combinations")
 
     with open(social_graph_file) as f:

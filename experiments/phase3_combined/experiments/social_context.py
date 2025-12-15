@@ -27,7 +27,7 @@ class SocialContextExperiment:
         self,
         config_path: str | None = None,
         provider: str | None = None,
-        max_chats: int | None = 5,
+        max_chats: int | None = 20,
     ):
         """Initialize the social context experiment."""
         load_env()

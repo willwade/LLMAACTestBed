@@ -47,7 +47,7 @@ def main():
             profile_module = importlib.import_module("profile_enhanced")
             ProfileEnhancedExperiment = getattr(profile_module, "ProfileEnhancedExperiment")
             profile_config = args.config or str(Path(__file__).parent / "configs" / "profile_enhanced.yaml")
-            exp = ProfileEnhancedExperiment(profile_config, args.provider, args.model)
+            exp = ProfileEnhancedExperiment(profile_config, args.provider, args.model, max_chats=20)
             results = exp.run_experiment()
             exp.save_results(results, args.output)
             print(f"[ok] Profile-Enhanced completed. Results: {len(results.get('enhanced_scores', []))} evaluations")
@@ -61,7 +61,7 @@ def main():
         try:
             social_module = importlib.import_module("social_context")
             SocialContextExperiment = getattr(social_module, "SocialContextExperiment")
-            exp = SocialContextExperiment(args.config, args.provider, max_chats=5)
+            exp = SocialContextExperiment(args.config, args.provider, max_chats=20)
             results = exp.run_experiment()
             exp.save_results(results, args.output)
             print(f"[ok] Social Context completed. Results: {len(results.get('social_scores', []))} evaluations")

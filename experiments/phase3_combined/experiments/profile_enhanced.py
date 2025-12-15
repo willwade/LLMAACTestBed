@@ -30,7 +30,7 @@ class ProfileEnhancedExperiment:
         config_path: str | None = None,
         llm_provider: str | None = None,
         llm_model: str | None = None,
-        max_chats: int | None = 5,
+        max_chats: int | None = 20,
     ):
         """Initialize the profile-enhanced experiment."""
         # Load environment variables

@@ -91,7 +91,21 @@ def load_data():
         raise FileNotFoundError(f"Keywords file not found in {keyword_candidates}")
 
     keywords_df = pd.read_csv(keywords_file, sep='\t')
+    keywords_df = keywords_df.rename(columns=lambda c: c.strip())
+    if "Instruction " in keywords_df.columns and "Instruction" not in keywords_df.columns:
+        keywords_df = keywords_df.rename(columns={"Instruction ": "Instruction"})
+    if "Key word " in keywords_df.columns and "Key word" not in keywords_df.columns:
+        keywords_df = keywords_df.rename(columns={"Key word ": "Key word"})
+    if "Key Word2 " in keywords_df.columns and "Key Word2" not in keywords_df.columns:
+        keywords_df = keywords_df.rename(columns={"Key Word2 ": "Key Word2"})
+    if "Key Word3 " in keywords_df.columns and "Key Word3" not in keywords_df.columns:
+        keywords_df = keywords_df.rename(columns={"Key Word3 ": "Key Word3"})
 
+    keywords_df = keywords_df.dropna(subset=["Instruction"])
+    keywords_df["Instruction"] = keywords_df["Instruction"].astype(str).str.strip()
+    keywords_df = keywords_df[keywords_df["Instruction"] != ""]
+    keyword_cols = ["Key word", "Key Word2", "Key Word3"]
+    keywords_df = keywords_df.dropna(how="all", subset=[c for c in keyword_cols if c in keywords_df.columns])
     # Check column names and print them for debugging
     print("Available columns:", list(keywords_df.columns))
 
