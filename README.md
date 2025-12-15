@@ -40,6 +40,12 @@ uv run experiments/phase1_chat_history/run_evaluation.py --provider gemini --sam
 # Note: Some experiments may need additional setup or data files
 ```
 
+### Quick Commands (OpenAI defaults)
+- Phase 1 (200 samples, test baton data): `uv run run-phase1 --data data/test/baton-export-2025-11-24-nofullstop.json --sample-size 200`
+- Phase 2 (context hypotheses): `uv run run-phase2 --provider openai --model gpt-4o-mini --experiment all --profile data/synthetic/profiles/dave_context.json --transcripts data/synthetic/transcripts/transcript_data_2.json --vague data/synthetic/transcripts/transcript_vague.json`
+- Phase 3 (combined, processed baton conversations): `uv run run-phase3 --provider openai --model gpt-4o-mini`
+- Phase 4 (keyword→utterance, falls back to synthetic phase4 data): `uv run python experiments/phase4_keyword_creation/run_experiment.py --provider openai --model gpt-4o-mini --sample-size 10`
+
 ## 🔬 Research Framework Overview
 
 This repository implements a multi-phase research approach for evaluating context-aware AAC systems:
