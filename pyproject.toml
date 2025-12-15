@@ -1,0 +1,142 @@
+[project]
+name = "context-aware-aac-testbed"
+version = "0.1.0"
+description = "A comprehensive framework for evaluating context-aware LLM systems for AAC users"
+authors = [
+    {name = "ContextAwareTestBed Research Team"}
+]
+readme = "README.md"
+requires-python = ">=3.11"
+license = {text = "MIT"}
+keywords = ["aac", "llm", "context-aware", "research", "mnd"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+]
+
+dependencies = [
+    # Core dependencies
+    "pandas>=2.0.0",
+    "numpy>=1.24.0",
+
+    # LLM clients - multi-provider support
+    "llm>=0.16",
+    "llm-gemini>=0.1",
+    "openai>=1.0.0",
+    "anthropic>=0.25.0",
+
+    # Data processing and evaluation
+    "scipy>=1.10.0",
+    "scikit-learn>=1.3.0",
+    "sentence-transformers>=2.2.0",
+    "Levenshtein>=0.21.0",
+    "nltk>=3.8",
+
+    # Visualization
+    "matplotlib>=3.7.0",
+    "seaborn>=0.12.0",
+
+    # Configuration and utilities
+    "pyyaml>=6.0",
+    "tenacity>=8.2.0",
+    "python-dotenv>=1.0.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    # Code quality
+    "ruff>=0.5.0",
+    "ty>=0.0.1a34",
+
+    # Testing
+    "pytest>=7.4.0",
+    "pytest-cov>=4.1.0",
+
+    # Jupyter (for analysis/exploration)
+    "jupyter>=1.0.0",
+    "ipykernel>=6.25.0",
+]
+
+[project.scripts]
+# CLI commands for the framework
+run-phase1 = "experiments.phase1_chat_history.run_phase1:main"
+run-phase2 = "experiments.phase2_context_aware.run_context_experiments:main"
+run-phase3 = "experiments.phase3_combined.run_phase3:main"
+run-all = "run_all_experiments:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["lib"]
+
+[tool.ruff]
+# Exclude patterns
+exclude = [
+    ".git",
+    ".ruff_cache",
+    "__pycache__",
+    "*.egg-info",
+    "build",
+    "dist",
+]
+
+# Line length
+line-length = 100
+
+# Target Python version
+target-version = "py311"
+
+[tool.ruff.lint]
+# Enable rules
+select = [
+    "E",      # pycodestyle errors
+    "W",      # pycodestyle warnings
+    "F",      # pyflakes
+    "I",      # isort
+    "N",      # pep8-naming
+    "UP",     # pyupgrade
+    "B",      # flake8-bugbear
+    "C4",     # flake8-comprehensions
+    "TCH",    # flake8-type-checking
+]
+
+# Ignore rules
+ignore = [
+    "E501",   # line too long (handled by formatter)
+    "N802",   # function name should be lowercase (for LLM methods)
+    "N803",   # argument name should be lowercase (for LLM params)
+    "N806",   # variable name should be lowercase
+    "TCH001", # typing-only import
+    "TCH002", # typing-only import
+    "TCH003", # typing-only import
+]
+
+[tool.ruff.lint.per-file-ignores]
+"__init__.py" = ["F401"]  # Allow unused imports in __init__.py
+"test_*.py" = ["S101"]    # Allow assert in tests
+
+[tool.ruff.format]
+# Use double quotes
+quote-style = "double"
+
+# Indent with spaces
+indent-style = "space"
+
+# Line ending
+line-ending = "auto"
+
+# Docstring format
+docstring-code-format = true
+
+
+[dependency-groups]
+dev = [
+    "ty>=0.0.1a34",
+]

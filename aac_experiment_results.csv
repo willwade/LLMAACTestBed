@@ -1,6 +1,0 @@
-ID,Scenario,Ground_Truth,H5_Prediction (Speech Only),H5_Score,H4_Prediction (Full Context),H4_Score,Delta
-101,"Kelsey: The TV? God, sorry. (Kelsey low...",Remote. Here.,That's better.,1,TV volume down,5,4
-102,Kelsey: What is it? Pain?...,Neck. Heavy.,Syringe driver.,1,Neck brace adjust.,6,5
-103,"Kelsey: Dave, you'll freeze....",Fan. On. Now.,Hot.,5,I'm hot.,5,0
-104,Kelsey: For the night? Or just for a n...,Mask.,Mask on,9,Mask on,9,0
-105,Dawn: I wish I could do something. D...,No visit. Too... tired.,No bus. Floods.,1,No. Nurse here.,5,4

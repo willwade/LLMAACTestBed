@@ -1,0 +1,60 @@
+# Configuration for Profile-Enhanced Chat History Experiment
+
+experiment:
+  name: "profile_enhanced"
+  description: "Enhance real chat history with synthetic user profiles"
+  phase: 3
+
+data:
+  chat_history:
+    path: "data/real/chat_history/processed/dataset.json"
+    required_fields: ["chat_id", "messages", "timestamp"]
+
+  profiles:
+    directory: "data/synthetic/profiles/"
+    required_fields: ["user_id", "profile_name", "communication_methods"]
+
+  mappings:
+    path: "data/synthetic/chat_profile_mappings/mappings.json"
+
+llm:
+  provider: null  # Uses DEFAULT_LLM_PROVIDER from environment
+  model: null     # Uses provider-specific default from environment
+  temperature: 0.2
+  max_tokens: 200
+
+evaluation:
+  metrics:
+    - "embedding_similarity"
+    - "judge_score"
+    - "improvement"
+
+  comparison_points:
+    - "baseline"  # Chat history only
+    - "enhanced"  # With profile context
+
+context:
+  profile_sections:
+    - "name"
+    - "age"
+    - "diagnosis"
+    - "communication_methods"
+    - "physical_limitations"
+    - "personal_background"
+    - "technology_experience"
+
+processing:
+  min_chat_length: 3  # Minimum messages for evaluation
+  context_window: 5    # Number of previous messages to use
+  exclude_recent: 2    # Exclude last N messages from context
+
+output:
+  format: "json"
+  include_raw_data: false
+  timestamp: true
+  compression: false
+
+logging:
+  level: "INFO"
+  file: "logs/phase3_profile_enhanced.log"
+  format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
