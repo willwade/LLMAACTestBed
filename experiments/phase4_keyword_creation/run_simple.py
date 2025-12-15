@@ -77,14 +77,18 @@ def create_output_directory(base_dir: str | None = None) -> Path:
 
 
 def load_data():
-    """Load keyword data and social graph."""
-    # Use centralized data directory
-    data_dir = Path(__file__).parent.parent.parent / "data" / "real" / "profiles" / "Dwayne"
+    """Load keyword data and social graph with fallback to synthetic samples."""
+    root = Path(__file__).parent.parent.parent
+    real_dir = root / "data" / "real" / "profiles" / "Dwayne"
+    synth_dir = root / "data" / "synthetic" / "phase4"
 
-    # Load keywords
-    keywords_file = data_dir / "DwayneKeyWords.tsv"
-    if not keywords_file.exists():
-        raise FileNotFoundError(f"Keywords file not found: {keywords_file}")
+    keyword_candidates = [
+        real_dir / "DwayneKeyWords.tsv",
+        synth_dir / "DwayneKeyWords.tsv",
+    ]
+    keywords_file = next((p for p in keyword_candidates if p.exists()), None)
+    if not keywords_file:
+        raise FileNotFoundError(f"Keywords file not found in {keyword_candidates}")
 
     keywords_df = pd.read_csv(keywords_file, sep='\t')
 
@@ -100,10 +104,13 @@ def load_data():
     else:
         raise ValueError(f"Instruction column not found. Available columns: {list(keywords_df.columns)}")
 
-    # Load social graph
-    social_graph_file = data_dir / "social_graph.json"
-    if not social_graph_file.exists():
-        raise FileNotFoundError(f"Social graph file not found: {social_graph_file}")
+    social_candidates = [
+        real_dir / "social_graph.json",
+        synth_dir / "social_graph.json",
+    ]
+    social_graph_file = next((p for p in social_candidates if p.exists()), None)
+    if not social_graph_file:
+        raise FileNotFoundError(f"Social graph file not found in {social_candidates}")
 
     with open(social_graph_file) as f:
         social_graph = json.load(f)

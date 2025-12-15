@@ -42,7 +42,7 @@ uv run experiments/phase1_chat_history/run_evaluation.py --provider gemini --sam
 
 ## 🔬 Research Framework Overview
 
-This repository implements a three-phase research approach for evaluating context-aware AAC systems:
+This repository implements a multi-phase research approach for evaluating context-aware AAC systems:
 
 ### Phase 1: Chat History Evaluation
 - **Location**: `experiments/phase1_chat_history/`
@@ -61,6 +61,12 @@ This repository implements a three-phase research approach for evaluating contex
 - **Data**: Real chat + synthetic social graphs and profiles
 - **Focus**: Real-world validation and energy cost analysis
 - **Innovation**: Social context-aware conversation prediction
+
+### Phase 4: Keyword Creation and Utterance Expansion
+- **Location**: `experiments/phase4_keyword_creation/`
+- **Data**: Synthetic keyword prompts and target utterances
+- **Focus**: Evaluating keyword-to-utterance generation quality
+- **Outputs**: Keyword datasets and expanded utterance candidates
 
 ## 🏗️ Repository Structure
 
@@ -102,9 +108,14 @@ ContextAwareTestBed/
 ├── results/                     # Experiment outputs
 ├── docs/                        # Documentation
 ├── pyproject.toml               # UV configuration and dependencies
-├── mypy.ini                     # Type checking configuration
 └── .env.example                 # Environment variable template
 ```
+
+## 📦 Data Defaults and Samples
+- Real datasets (if available) are expected under `data/real/...`.
+- Synthetic sample data is provided under `data/synthetic/...` for offline or quick runs.
+- Phase 4 (keyword creation) now falls back to `data/synthetic/phase4/` if the real Dwayne dataset is not present (`DwayneKeyWords.tsv`, `social_graph.json`).
+- Phase 1/2/3 can run against synthetic/demo data; replace paths with your real datasets when available.
 
 ## ⚡ Key Features
 
@@ -134,11 +145,11 @@ ContextAwareTestBed/
 uv run ruff check
 uv run ruff format
 
-# Run type checking (recommended)
-uv run mypy lib/
+# Run static analysis (optional)
+uv run ty lib/
 
 # Run both together
-uv run ruff check && uv run mypy lib/
+uv run ruff check && uv run ty lib/
 ```
 
 ### Environment Configuration
@@ -225,31 +236,11 @@ else:
 ```
 
 ## 📚 Research Papers and Publications
-
-### Supported Publication Types
-- **CHI, ASSETS, UbiComp**: HCI and accessibility innovations
-- **ACM TACCESS**: Accessibility computing journal
-- **IEEE THMS**: Human-machine systems
-- **Journal of AAC**: Augmentative communication research
-
-### Reproducibility
-- Complete experiment code and configuration
-- Synthetic data generation scripts
-- Results aggregation and visualization
-- Multi-provider LLM support for validation
-
-## 🔒 Privacy and Security
-
-- **Real Data Protection**: Chat history files in `.gitignore`
-- **API Key Security**: Environment variables only
-- **Anonymization**: All synthetic data is fake
-- **No PII**: No personally identifiable information in repository
-
 ## 🤝 Contributing
 
 We welcome contributions! Please:
 
-1. Follow code quality standards (`ruff`, `mypy`)
+1. Follow code quality standards (`ruff`, `ty`)
 2. Add type hints to new code
 3. Update documentation
 4. Use UV for dependency management
@@ -258,13 +249,6 @@ We welcome contributions! Please:
 ## 📄 License
 
 This project is licensed under the MIT License - see LICENSE file for details.
-
-## 🙏 Acknowledgments
-
-- **AAC Community** for use cases and feedback
-- **Research Participants** for data contributions
-- **OpenAI and Google** for LLM APIs
-- **UV Team** for modern Python package management
 
 ---
 
