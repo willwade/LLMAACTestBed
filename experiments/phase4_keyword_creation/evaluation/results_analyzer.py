@@ -280,6 +280,24 @@ class ResultsAnalyzer:
 
     def generate_analysis_report(self, all_results: dict[str, Any]) -> str:
         """Generate a text analysis report."""
+
+        def _append_examples(report_lines: list[str], results: dict[str, Any], label: str, max_examples: int = 3):
+            """Append a few prediction vs target examples to the report."""
+            preds = results.get("predictions", [])
+            targets = results.get("target_texts", [])
+            keywords = results.get("keyword_combinations", [])
+
+            if not preds or not targets:
+                return
+
+            report_lines.append(f"### {label} Examples")
+            for idx in range(min(max_examples, len(preds))):
+                kw = ", ".join(keywords[idx]) if idx < len(keywords) else "N/A"
+                report_lines.append(f"- Keywords: {kw}")
+                report_lines.append(f"  - Prediction: {preds[idx]}")
+                report_lines.append(f"  - Target: {targets[idx]}")
+            report_lines.append("")
+
         report = []
         report.append("# Phase 4 Keyword-to-Utterance Generation: Analysis Report")
         report.append("=" * 60)
@@ -327,6 +345,25 @@ class ResultsAnalyzer:
                 report.append(f"- Most effective keyword: '{best_keyword}'")
                 report.append(f"- Mean score: {best_score:.2f}/10")
                 report.append("")
+
+        # Example predictions
+        report.append("## Example Predictions")
+        report.append("")
+
+        if "baseline" in all_results:
+            _append_examples(report, all_results["baseline"], "Baseline")
+
+        if "contextual" in all_results:
+            context_levels = all_results["contextual"].get("context_levels", {})
+            # Use full_context examples if available, otherwise the first context level
+            chosen_level = context_levels.get("full_context") or next(iter(context_levels.values()), {})
+            _append_examples(report, chosen_level, "Contextual (full context)")
+
+        if "single_keyword" in all_results:
+            keyword_results = all_results["single_keyword"].get("keyword_results", {})
+            for kw, res in list(keyword_results.items())[:2]:  # limit to a couple keywords
+                label = f"Single Keyword: {kw}"
+                _append_examples(report, res, label)
 
         # Save report
         report_text = "\n".join(report)
