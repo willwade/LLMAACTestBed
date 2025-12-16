@@ -1,10 +1,8 @@
 # ContextAwareTestBed .gitignore
 
 # Real data - NEVER commit real user data
-data/real/chat_history/raw/*
-data/real/chat_history/processed/*
-!data/real/chat_history/raw/.gitkeep
-!data/real/chat_history/processed/.gitkeep
+data/real/
+!data/real/.gitkeep
 
 # Results directories
 results/
