@@ -43,10 +43,7 @@ class KeywordEvaluator:
 
 KEYWORDS: {keywords_str}
 
-Based only on these keywords, predict what Dwayne wants to communicate.
-Dwayne has limited speech and uses short telegraphic phrases.
-
-Predicted utterance:"""
+Based only on these keywords, give ONE concise, actionable utterance that states exactly what Dwayne wants done. Include the specific action/object implied by the keywords. Do not add pleasantries or labels. Output only the utterance."""
 
     def _create_contextual_prompt(
         self, keywords: list[str], context: dict[str, Any]
@@ -88,10 +85,7 @@ CONTEXT:
 
 KEYWORDS: {keywords_str}
 
-Based on the context and keywords, predict Dwayne's intended utterance.
-Consider his current situation, who he's with, and his communication patterns.
-
-Predicted utterance:"""
+Write ONE concise, actionable utterance that states exactly what Dwayne wants done, using the context to pick the specific action/object (e.g., what to apply, move, fetch). Keep it telegraphic but complete. Do not add pleasantries or labels. Output only the utterance."""
 
     def _evaluate_prediction(self, prediction: str, target: str) -> int:
         """Evaluate prediction against target using LLM judge."""

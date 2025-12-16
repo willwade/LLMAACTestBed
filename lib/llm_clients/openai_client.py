@@ -106,7 +106,11 @@ Respond with only the number 1-10."""
 
             # Extract number from response
             import re
-            match = re.search(r'\b(10|[1-9])\b', response)
+            raw_response = response.strip() if isinstance(response, str) else str(response)
+            if os.getenv("LOG_JUDGE_RESPONSES") == "1":
+                print(f"[judge-debug] raw: {raw_response}")
+
+            match = re.search(r'\b(10|[1-9])\b', raw_response)
             if match:
                 score = int(match.group(1))
                 return min(10, max(1, score))
