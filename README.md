@@ -1,4 +1,4 @@
-# ContextAwareTestBed: Unified Research Framework for AAC Systems
+# LLMAACTestBed: Unified Research Framework for AAC Systems
 
 A comprehensive framework for evaluating context-aware Large Language Model systems for Augmentative and Alternative Communication (AAC) users with Motor Neurone Disease (MND).
 
