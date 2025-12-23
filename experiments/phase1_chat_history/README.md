@@ -47,10 +47,10 @@ uv sync
 
 ```bash
 # Basic usage (process all test rows)
-uv run experiments/phase1_chat_history/run_evaluation.py --data path/to/chat_data.json
+uv run experiments/phase1_chat_history/evaluation/run_evaluation.py --data path/to/chat_data.json
 
 # Recommended defaults: 3 candidates, skip too-short prefixes
-uv run experiments/phase1_chat_history/run_evaluation.py \
+uv run experiments/phase1_chat_history/evaluation/run_evaluation.py \
   --data path/to/chat_data.json \
   --n-candidates 3 \
   --skip-short-prefixes \
@@ -58,13 +58,13 @@ uv run experiments/phase1_chat_history/run_evaluation.py \
   --visualize
 
 # With custom model
-uv run experiments/phase1_chat_history/run_evaluation.py \
+uv run experiments/phase1_chat_history/evaluation/run_evaluation.py \
   --data path/to/chat_data.json \
   --model gemini-1.5-pro \
   --corpus-ratio 0.8
 
 # With contextual filters and conversation window
-uv run experiments/phase1_chat_history/run_evaluation.py \
+uv run experiments/phase1_chat_history/evaluation/run_evaluation.py \
   --data path/to/chat_data.json \
   --n-candidates 3 \
   --skip-short-prefixes \

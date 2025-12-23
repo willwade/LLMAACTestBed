@@ -11,6 +11,7 @@ import warnings
 from collections import Counter
 from collections.abc import Callable
 from datetime import datetime
+from pathlib import Path
 from typing import Any
 
 import numpy as np
@@ -659,6 +660,32 @@ class ChatHistoryEvaluator:
                             )
 
         return pd.DataFrame(results)
+
+    def visualize_results(
+        self,
+        results_df: pd.DataFrame,
+        output_dir: str | Path | None = None,
+        formats: list[str] | None = None,
+    ) -> list[str]:
+        """
+        Lightweight visualization wrapper for Phase 1 usage.
+
+        Args:
+            results_df: DataFrame of evaluation results
+            output_dir: Directory to write figures (default: ./results/figures)
+            formats: List of formats (default: ["png"])
+
+        Returns:
+            List of generated figure paths.
+        """
+        from .visualizers import ResultsVisualizer
+
+        formats = formats or ["png"]
+        out_dir = Path(output_dir) if output_dir else Path("results") / "figures"
+        out_dir.mkdir(parents=True, exist_ok=True)
+
+        visualizer = ResultsVisualizer()
+        return visualizer.create_all_visualizations(results_df, out_dir, formats=formats)
 
     @retry(stop=stop_after_attempt(5), wait=wait_exponential(multiplier=1, min=4, max=10))
     def generate_completion(

@@ -47,16 +47,11 @@ def create_default_methods(evaluator: ChatHistoryEvaluator):
         ),
     }
 
-    # Metrics that require evaluator state (embedding model or LLM judge).
-    def embedding_similarity_wrapper(evaluator, target, proposal):
-        return evaluator.calculate_embedding_similarity(target, proposal)
-
-    def judge_similarity_wrapper(evaluator, target, proposal):
-        return evaluator.judge_similarity(target, proposal)
-
     evaluation_metrics = {
-        "embedding_similarity": embedding_similarity_wrapper,
-        "llm_judge_score": judge_similarity_wrapper,
+        "embedding_similarity": lambda proposal, target, partial=None: evaluator.calculate_embedding_similarity(
+            proposal, target
+        ),
+        "llm_judge_score": lambda proposal, target, partial=None: evaluator.judge_similarity(target, proposal),
         "character_accuracy": ChatHistoryEvaluator.calculate_character_accuracy,
         "character_accuracy_ci": ChatHistoryEvaluator.calculate_character_accuracy_case_insensitive,
         "word_accuracy": ChatHistoryEvaluator.calculate_word_accuracy,

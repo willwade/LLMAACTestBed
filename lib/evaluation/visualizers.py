@@ -304,7 +304,9 @@ class ResultsVisualizer:
             if "timestamp" in results_df.columns:
                 for fmt in formats:
                     path = output_dir / f"temporal_{metric}.{fmt}"
-                    self.create_temporal_analysis(results_df, metric, path)
+                    self.create_temporal_analysis(
+                        results_df, metric=metric, output_path=path
+                    )
                     generated_files.append(str(path))
 
         return generated_files
