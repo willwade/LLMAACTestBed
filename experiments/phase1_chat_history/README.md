@@ -35,10 +35,10 @@ The evaluation framework:
 ```bash
 # Clone the repository
 git clone https://github.com/your-repo/ContextAwareTestBed.git
-cd ContextAwareTestBed/ChatHistoryEvaluation
+cd ContextAwareTestBed
 
-# Install dependencies
-pip install -r requirements.txt
+# Install dependencies with uv
+uv sync
 ```
 
 ## Usage
@@ -47,10 +47,10 @@ pip install -r requirements.txt
 
 ```bash
 # Basic usage (process all test rows)
-python run_evaluation.py --data path/to/chat_data.json
+uv run experiments/phase1_chat_history/run_evaluation.py --data path/to/chat_data.json
 
 # Recommended defaults: 3 candidates, skip too-short prefixes
-python run_evaluation.py \
+uv run experiments/phase1_chat_history/run_evaluation.py \
   --data path/to/chat_data.json \
   --n-candidates 3 \
   --skip-short-prefixes \
@@ -58,13 +58,13 @@ python run_evaluation.py \
   --visualize
 
 # With custom model
-python run_evaluation.py \
+uv run experiments/phase1_chat_history/run_evaluation.py \
   --data path/to/chat_data.json \
   --model gemini-1.5-pro \
   --corpus-ratio 0.8
 
 # With contextual filters and conversation window
-python run_evaluation.py \
+uv run experiments/phase1_chat_history/run_evaluation.py \
   --data path/to/chat_data.json \
   --n-candidates 3 \
   --skip-short-prefixes \

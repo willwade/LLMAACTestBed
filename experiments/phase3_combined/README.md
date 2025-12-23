@@ -42,7 +42,7 @@ Phase 3 bridges the gap between:
 ```
 phase3_combined/
 ├── README.md                    # This file
-├── requirements.txt            # Phase 3 specific deps
+├── requirements.txt            # (deprecated; use uv at repo root)
 ├── configs/
 │   ├── profile_enhanced.yaml  # Config for profile experiments
 │   ├── social_context.yaml    # Config for social experiments
@@ -132,13 +132,13 @@ data/
 
 ```bash
 # Run all Phase 3 experiments
-python run_phase3.py
+uv run experiments/phase3_combined/run_phase3.py
 
 # Run specific experiment types
-python experiments/profile_enhanced.py --config configs/profile_enhanced.yaml
-python experiments/social_context.py --config configs/social_context.yaml
-python experiments/temporal_filtering.py --config configs/temporal_filter.yaml
-python experiments/hybrid_retrieval.py --config configs/hybrid_retrieval.yaml
+uv run experiments/phase3_combined/experiments/profile_enhanced.py --config experiments/phase3_combined/configs/profile_enhanced.yaml
+uv run experiments/phase3_combined/experiments/social_context.py --config experiments/phase3_combined/configs/social_context.yaml
+uv run experiments/phase3_combined/experiments/temporal_filtering.py --config experiments/phase3_combined/configs/temporal_filter.yaml
+uv run experiments/phase3_combined/experiments/hybrid_retrieval.py --config experiments/phase3_combined/configs/hybrid_retrieval.yaml
 ```
 
 ## Integration with Other Phases
