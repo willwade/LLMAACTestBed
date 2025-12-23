@@ -14,9 +14,11 @@ import sys
 from datetime import datetime
 from pathlib import Path
 
-# Add lib to path for imports
-sys.path.insert(0, str(Path(__file__).parent.parent / "lib"))
-from evaluation.chat_history_evaluator import ChatHistoryEvaluator
+# Add project root and lib to path for imports
+project_root = Path(__file__).resolve().parent.parent.parent
+sys.path.insert(0, str(project_root))
+sys.path.insert(0, str(project_root / "lib"))
+from lib.evaluation.chat_history_evaluator import ChatHistoryEvaluator
 
 
 def create_default_methods(evaluator: ChatHistoryEvaluator):
