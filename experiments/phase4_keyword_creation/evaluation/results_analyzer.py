@@ -13,7 +13,7 @@ import pandas as pd
 import seaborn as sns
 
 # Set up matplotlib for better plots
-plt.style.use('default')
+plt.style.use("default")
 sns.set_palette("husl")
 
 
@@ -40,7 +40,7 @@ class ResultsAnalyzer:
             "baseline": "part1_baseline_results.json",
             "contextual": "part2_contextual_results.json",
             "single_keyword": "part3_single_keyword_results.json",
-            "summary": "experiment_summary.json"
+            "summary": "experiment_summary.json",
         }
 
         for key, filename in result_files.items():
@@ -56,21 +56,23 @@ class ResultsAnalyzer:
         plt.figure(figsize=(10, 6))
 
         # Create histogram
-        plt.hist(scores, bins=range(1, 12), alpha=0.7, edgecolor='black')
+        plt.hist(scores, bins=range(1, 12), alpha=0.7, edgecolor="black")
 
-        plt.title(title, fontsize=14, fontweight='bold')
-        plt.xlabel('Similarity Score (1-10)', fontsize=12)
-        plt.ylabel('Frequency', fontsize=12)
+        plt.title(title, fontsize=14, fontweight="bold")
+        plt.xlabel("Similarity Score (1-10)", fontsize=12)
+        plt.ylabel("Frequency", fontsize=12)
         plt.xticks(range(1, 11))
-        plt.grid(axis='y', alpha=0.3)
+        plt.grid(axis="y", alpha=0.3)
 
         # Add statistics
         mean_score = sum(scores) / len(scores)
-        plt.axvline(mean_score, color='red', linestyle='--', linewidth=2, label=f'Mean: {mean_score:.2f}')
+        plt.axvline(
+            mean_score, color="red", linestyle="--", linewidth=2, label=f"Mean: {mean_score:.2f}"
+        )
         plt.legend()
 
         plt.tight_layout()
-        plt.savefig(self.figures_dir / f"{save_name}.png", dpi=300, bbox_inches='tight')
+        plt.savefig(self.figures_dir / f"{save_name}.png", dpi=300, bbox_inches="tight")
         plt.close()
 
     def create_context_comparison_plot(self, contextual_results: dict[str, Any]):
@@ -97,17 +99,17 @@ class ResultsAnalyzer:
 
         for level, scores in scores_by_level.items():
             data_for_box.append(scores)
-            labels.append(level.replace('_', ' ').title())
+            labels.append(level.replace("_", " ").title())
 
         plt.boxplot(data_for_box)
         plt.xticks(range(1, len(labels) + 1), labels)
-        plt.title('Score Distribution by Context Level', fontsize=14, fontweight='bold')
-        plt.ylabel('Similarity Score (1-10)', fontsize=12)
+        plt.title("Score Distribution by Context Level", fontsize=14, fontweight="bold")
+        plt.ylabel("Similarity Score (1-10)", fontsize=12)
         plt.xticks(rotation=45)
-        plt.grid(axis='y', alpha=0.3)
+        plt.grid(axis="y", alpha=0.3)
 
         plt.tight_layout()
-        plt.savefig(self.figures_dir / "context_level_comparison.png", dpi=300, bbox_inches='tight')
+        plt.savefig(self.figures_dir / "context_level_comparison.png", dpi=300, bbox_inches="tight")
         plt.close()
 
         # Create improvement plot
@@ -119,19 +121,26 @@ class ResultsAnalyzer:
 
                 plt.figure(figsize=(10, 6))
                 bars = plt.bar(levels, mean_improvements)
-                plt.title('Mean Score Improvement by Context Level', fontsize=14, fontweight='bold')
-                plt.xlabel('Context Level', fontsize=12)
-                plt.ylabel('Mean Improvement (points)', fontsize=12)
+                plt.title("Mean Score Improvement by Context Level", fontsize=14, fontweight="bold")
+                plt.xlabel("Context Level", fontsize=12)
+                plt.ylabel("Mean Improvement (points)", fontsize=12)
                 plt.xticks(rotation=45)
 
                 # Add value labels on bars
                 for bar, improvement in zip(bars, mean_improvements, strict=False):
-                    plt.text(bar.get_x() + bar.get_width()/2, bar.get_height() + 0.01,
-                            f'{improvement:.2f}', ha='center', va='bottom')
+                    plt.text(
+                        bar.get_x() + bar.get_width() / 2,
+                        bar.get_height() + 0.01,
+                        f"{improvement:.2f}",
+                        ha="center",
+                        va="bottom",
+                    )
 
-                plt.grid(axis='y', alpha=0.3)
+                plt.grid(axis="y", alpha=0.3)
                 plt.tight_layout()
-                plt.savefig(self.figures_dir / "context_improvements.png", dpi=300, bbox_inches='tight')
+                plt.savefig(
+                    self.figures_dir / "context_improvements.png", dpi=300, bbox_inches="tight"
+                )
                 plt.close()
 
     def create_single_keyword_analysis(self, single_keyword_results: dict[str, Any]):
@@ -144,41 +153,53 @@ class ResultsAnalyzer:
         # Create DataFrame for easier plotting
         df_data = []
         for keyword, stats in keyword_stats.items():
-            df_data.append({
-                'Keyword': keyword,
-                'Mean Score': stats['mean_score'],
-                'Success Rate': stats['success_rate'],
-                'Total Tests': stats['total_tests']
-            })
+            df_data.append(
+                {
+                    "Keyword": keyword,
+                    "Mean Score": stats["mean_score"],
+                    "Success Rate": stats["success_rate"],
+                    "Total Tests": stats["total_tests"],
+                }
+            )
 
         df = pd.DataFrame(df_data)
-        df = df.sort_values('Mean Score', ascending=True)
+        df = df.sort_values("Mean Score", ascending=True)
 
         # Create horizontal bar chart
         plt.figure(figsize=(12, 8))
 
         # Plot mean scores
-        bars = plt.barh(df['Keyword'], df['Mean Score'])
-        plt.title('Single Keyword Effectiveness (Mean Scores)', fontsize=14, fontweight='bold')
-        plt.xlabel('Mean Similarity Score (1-10)', fontsize=12)
-        plt.ylabel('Keyword', fontsize=12)
+        bars = plt.barh(df["Keyword"], df["Mean Score"])
+        plt.title("Single Keyword Effectiveness (Mean Scores)", fontsize=14, fontweight="bold")
+        plt.xlabel("Mean Similarity Score (1-10)", fontsize=12)
+        plt.ylabel("Keyword", fontsize=12)
 
         # Add value labels
-        for bar, score in zip(bars, df['Mean Score'], strict=False):
-            plt.text(bar.get_width() + 0.05, bar.get_y() + bar.get_height()/2,
-                    f'{score:.2f}', ha='left', va='center')
+        for bar, score in zip(bars, df["Mean Score"], strict=False):
+            plt.text(
+                bar.get_width() + 0.05,
+                bar.get_y() + bar.get_height() / 2,
+                f"{score:.2f}",
+                ha="left",
+                va="center",
+            )
 
         plt.xlim(0, 11)
-        plt.grid(axis='x', alpha=0.3)
+        plt.grid(axis="x", alpha=0.3)
         plt.tight_layout()
-        plt.savefig(self.figures_dir / "single_keyword_effectiveness.png", dpi=300, bbox_inches='tight')
+        plt.savefig(
+            self.figures_dir / "single_keyword_effectiveness.png", dpi=300, bbox_inches="tight"
+        )
         plt.close()
 
     def create_summary_dashboard(self, all_results: dict[str, Any]):
         """Create a summary dashboard with key metrics."""
         fig, axes = plt.subplots(2, 2, figsize=(15, 12))
-        fig.suptitle('Phase 4 Keyword-to-Utterance Generation: Summary Dashboard',
-                     fontsize=16, fontweight='bold')
+        fig.suptitle(
+            "Phase 4 Keyword-to-Utterance Generation: Summary Dashboard",
+            fontsize=16,
+            fontweight="bold",
+        )
 
         # 1. Overall performance comparison
         ax1 = axes[0, 0]
@@ -195,19 +216,29 @@ class ResultsAnalyzer:
                     experiment_labels.append(part_name.replace("_", " ").title())
 
         if experiment_scores:
-            colors = plt.cm.get_cmap('tab10')(range(len(experiment_scores)))
-            bars = ax1.bar(range(len(experiment_scores)), list(experiment_scores.values()), color=colors)
-            ax1.set_title('Mean Score by Experiment Part', fontweight='bold')
-            ax1.set_ylabel('Mean Score (1-10)')
+            colors = plt.cm.get_cmap("tab10")(range(len(experiment_scores)))
+            bars = ax1.bar(
+                range(len(experiment_scores)), list(experiment_scores.values()), color=colors
+            )
+            ax1.set_title("Mean Score by Experiment Part", fontweight="bold")
+            ax1.set_ylabel("Mean Score (1-10)")
             ax1.set_xticks(range(len(experiment_scores)))
-            ax1.set_xticklabels([k.replace("_", " ").title() for k in experiment_scores.keys()],
-                              rotation=45, ha='right')
+            ax1.set_xticklabels(
+                [k.replace("_", " ").title() for k in experiment_scores.keys()],
+                rotation=45,
+                ha="right",
+            )
             ax1.set_ylim(0, 10)
 
             # Add value labels
             for bar, score in zip(bars, experiment_scores.values(), strict=False):
-                ax1.text(bar.get_x() + bar.get_width()/2, bar.get_height() + 0.1,
-                        f'{score:.2f}', ha='center', va='bottom')
+                ax1.text(
+                    bar.get_x() + bar.get_width() / 2,
+                    bar.get_height() + 0.1,
+                    f"{score:.2f}",
+                    ha="center",
+                    va="bottom",
+                )
 
         # 2. Success rates
         ax2 = axes[0, 1]
@@ -221,67 +252,82 @@ class ResultsAnalyzer:
                 success_rates[part_name] = part_stats.get("accuracy_over_70_percent", 0)
 
         if success_rates:
-            colors = plt.cm.get_cmap('tab10')(range(len(success_rates)))
+            colors = plt.cm.get_cmap("tab10")(range(len(success_rates)))
             bars = ax2.bar(range(len(success_rates)), list(success_rates.values()), color=colors)
-            ax2.set_title('Success Rate (Score ≥ 7/10)', fontweight='bold')
-            ax2.set_ylabel('Success Rate (%)')
+            ax2.set_title("Success Rate (Score ≥ 7/10)", fontweight="bold")
+            ax2.set_ylabel("Success Rate (%)")
             ax2.set_xticks(range(len(success_rates)))
-            ax2.set_xticklabels([k.replace("_", " ").title() for k in success_rates.keys()],
-                              rotation=45, ha='right')
+            ax2.set_xticklabels(
+                [k.replace("_", " ").title() for k in success_rates.keys()], rotation=45, ha="right"
+            )
             ax2.set_ylim(0, 100)
 
             # Add value labels
             for bar, rate in zip(bars, success_rates.values(), strict=False):
-                ax2.text(bar.get_x() + bar.get_width()/2, bar.get_height() + 1,
-                        f'{rate:.1f}%', ha='center', va='bottom')
+                ax2.text(
+                    bar.get_x() + bar.get_width() / 2,
+                    bar.get_height() + 1,
+                    f"{rate:.1f}%",
+                    ha="center",
+                    va="bottom",
+                )
 
         # 3. Score distribution for baseline (if available)
         ax3 = axes[1, 0]
         if "baseline" in all_results and "scores" in all_results["baseline"]:
             scores = all_results["baseline"]["scores"]
-            ax3.hist(scores, bins=range(1, 12), alpha=0.7, edgecolor='black', color='skyblue')
-            ax3.set_title('Baseline Score Distribution', fontweight='bold')
-            ax3.set_xlabel('Score (1-10)')
-            ax3.set_ylabel('Frequency')
+            ax3.hist(scores, bins=range(1, 12), alpha=0.7, edgecolor="black", color="skyblue")
+            ax3.set_title("Baseline Score Distribution", fontweight="bold")
+            ax3.set_xlabel("Score (1-10)")
+            ax3.set_ylabel("Frequency")
             ax3.set_xticks(range(1, 11))
-            ax3.grid(axis='y', alpha=0.3)
+            ax3.grid(axis="y", alpha=0.3)
 
         # 4. Summary statistics table
         ax4 = axes[1, 1]
-        ax4.axis('off')
+        ax4.axis("off")
 
         if "summary" in all_results and "summary_statistics" in all_results["summary"]:
             summary_stats = all_results["summary"]["summary_statistics"]
 
             # Create table data
             table_data = []
-            headers = ['Experiment', 'Tests', 'Mean Score', 'Success Rate', 'Max Score']
+            headers = ["Experiment", "Tests", "Mean Score", "Success Rate", "Max Score"]
 
             for exp_name, stats in summary_stats.items():
-                table_data.append([
-                    exp_name.replace("_", " ").title(),
-                    stats.get("total_tests", 0),
-                    f"{stats.get('mean_score', 0):.2f}",
-                    f"{stats.get('accuracy_over_70_percent', 0):.1f}%",
-                    stats.get("max_score", 0)
-                ])
+                table_data.append(
+                    [
+                        exp_name.replace("_", " ").title(),
+                        stats.get("total_tests", 0),
+                        f"{stats.get('mean_score', 0):.2f}",
+                        f"{stats.get('accuracy_over_70_percent', 0):.1f}%",
+                        stats.get("max_score", 0),
+                    ]
+                )
 
             if table_data:
-                table = ax4.table(cellText=table_data, colLabels=headers,
-                               cellLoc='center', loc='center', bbox=[0, 0, 1, 1])
+                table = ax4.table(
+                    cellText=table_data,
+                    colLabels=headers,
+                    cellLoc="center",
+                    loc="center",
+                    bbox=[0, 0, 1, 1],
+                )
                 table.auto_set_font_size(False)
                 table.set_fontsize(10)
                 table.scale(1, 2)
-                ax4.set_title('Summary Statistics', fontweight='bold', pad=20)
+                ax4.set_title("Summary Statistics", fontweight="bold", pad=20)
 
         plt.tight_layout()
-        plt.savefig(self.figures_dir / "summary_dashboard.png", dpi=300, bbox_inches='tight')
+        plt.savefig(self.figures_dir / "summary_dashboard.png", dpi=300, bbox_inches="tight")
         plt.close()
 
     def generate_analysis_report(self, all_results: dict[str, Any]) -> str:
         """Generate a text analysis report."""
 
-        def _append_examples(report_lines: list[str], results: dict[str, Any], label: str, max_examples: int = 3):
+        def _append_examples(
+            report_lines: list[str], results: dict[str, Any], label: str, max_examples: int = 3
+        ):
             """Append a few prediction vs target examples to the report."""
             preds = results.get("predictions", [])
             targets = results.get("target_texts", [])
@@ -314,7 +360,9 @@ class ResultsAnalyzer:
                 report.append(f"### {exp_name.replace('_', ' ').title()}")
                 report.append(f"- Total Tests: {stats.get('total_tests', 0)}")
                 report.append(f"- Mean Score: {stats.get('mean_score', 0):.2f}/10")
-                report.append(f"- Success Rate (≥7/10): {stats.get('accuracy_over_70_percent', 0):.1f}%")
+                report.append(
+                    f"- Success Rate (≥7/10): {stats.get('accuracy_over_70_percent', 0):.1f}%"
+                )
                 report.append(f"- Max Score: {stats.get('max_score', 0)}")
                 report.append("")
 
@@ -326,19 +374,28 @@ class ResultsAnalyzer:
         if "contextual" in all_results and "improvements_by_level" in all_results["contextual"]:
             improvements = all_results["contextual"]["improvements_by_level"]
             if improvements:
-                best_level = max(improvements.keys(), key=lambda k: improvements[k]["mean_improvement"])
+                best_level = max(
+                    improvements.keys(), key=lambda k: improvements[k]["mean_improvement"]
+                )
                 best_improvement = improvements[best_level]["mean_improvement"]
 
                 report.append("### Context Impact")
-                report.append(f"- Best performing context level: {best_level.replace('_', ' ').title()}")
+                report.append(
+                    f"- Best performing context level: {best_level.replace('_', ' ').title()}"
+                )
                 report.append(f"- Mean improvement: {best_improvement:.2f} points")
                 report.append("")
 
         # Single keyword effectiveness
-        if "single_keyword" in all_results and "effectiveness_by_keyword" in all_results["single_keyword"]:
+        if (
+            "single_keyword" in all_results
+            and "effectiveness_by_keyword" in all_results["single_keyword"]
+        ):
             keyword_stats = all_results["single_keyword"]["effectiveness_by_keyword"]
             if keyword_stats:
-                best_keyword = max(keyword_stats.keys(), key=lambda k: keyword_stats[k]["mean_score"])
+                best_keyword = max(
+                    keyword_stats.keys(), key=lambda k: keyword_stats[k]["mean_score"]
+                )
                 best_score = keyword_stats[best_keyword]["mean_score"]
 
                 report.append("### Single Keyword Effectiveness")
@@ -356,7 +413,9 @@ class ResultsAnalyzer:
         if "contextual" in all_results:
             context_levels = all_results["contextual"].get("context_levels", {})
             # Use full_context examples if available, otherwise the first context level
-            chosen_level = context_levels.get("full_context") or next(iter(context_levels.values()), {})
+            chosen_level = context_levels.get("full_context") or next(
+                iter(context_levels.values()), {}
+            )
             _append_examples(report, chosen_level, "Contextual (full context)")
 
         if "single_keyword" in all_results:
@@ -369,7 +428,7 @@ class ResultsAnalyzer:
         report_text = "\n".join(report)
         report_path = self.results_dir / "analysis_report.md"
 
-        with open(report_path, 'w') as f:
+        with open(report_path, "w") as f:
             f.write(report_text)
 
         return report_text
@@ -391,7 +450,9 @@ class ResultsAnalyzer:
         if "baseline" in all_results:
             scores = all_results["baseline"].get("scores", [])
             if scores:
-                self.create_score_distribution_plot(scores, "Baseline Score Distribution", "baseline_scores")
+                self.create_score_distribution_plot(
+                    scores, "Baseline Score Distribution", "baseline_scores"
+                )
                 print("✅ Created baseline score distribution")
 
         if "contextual" in all_results:

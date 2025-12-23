@@ -176,6 +176,76 @@ class WordAccuracyMetric(BaseMetric):
         return "word_accuracy"
 
 
+class WordPrecisionMetric(BaseMetric):
+    """
+    Word-level precision based on overlap.
+    """
+
+    def calculate(self, predictions: list[str], targets: list[str]) -> list[float]:
+        scores = []
+        for pred, target in zip(predictions, targets, strict=False):
+            pred_words = set(pred.lower().split())
+            target_words = set(target.lower().split())
+
+            if len(pred_words) == 0:
+                scores.append(0.0)
+                continue
+
+            intersection = pred_words.intersection(target_words)
+            scores.append(len(intersection) / len(pred_words))
+        return scores
+
+    def name(self) -> str:
+        return "word_precision"
+
+
+class WordRecallMetric(BaseMetric):
+    """
+    Word-level recall based on overlap.
+    """
+
+    def calculate(self, predictions: list[str], targets: list[str]) -> list[float]:
+        scores = []
+        for pred, target in zip(predictions, targets, strict=False):
+            pred_words = set(pred.lower().split())
+            target_words = set(target.lower().split())
+
+            if len(target_words) == 0:
+                scores.append(1.0 if len(pred_words) == 0 else 0.0)
+                continue
+
+            intersection = pred_words.intersection(target_words)
+            scores.append(len(intersection) / len(target_words))
+        return scores
+
+    def name(self) -> str:
+        return "word_recall"
+
+
+class WordF1Metric(BaseMetric):
+    """
+    Word-level F1 combining precision and recall.
+    """
+
+    def calculate(self, predictions: list[str], targets: list[str]) -> list[float]:
+        scores = []
+        for pred, target in zip(predictions, targets, strict=False):
+            precision_metric = WordPrecisionMetric()
+            recall_metric = WordRecallMetric()
+            precision = precision_metric.calculate([pred], [target])[0]
+            recall = recall_metric.calculate([pred], [target])[0]
+
+            if precision + recall == 0:
+                scores.append(0.0)
+                continue
+
+            scores.append(2 * (precision * recall) / (precision + recall))
+        return scores
+
+    def name(self) -> str:
+        return "word_f1"
+
+
 class BLEUScoreMetric(BaseMetric):
     """
     BLEU score for evaluating text generation.

@@ -28,7 +28,7 @@ def calculate_statistics(scores: Sequence[float]) -> dict[str, float]:
         "max": max(scores),
         "min": min(scores),
         "count": len(scores),
-        "success_rate": sum(1 for s in scores if s >= 7) / len(scores) * 100
+        "success_rate": sum(1 for s in scores if s >= 7) / len(scores) * 100,
     }
 
 
@@ -49,8 +49,12 @@ def validate_llm_response(response: str) -> bool:
 
     # Check for common error indicators
     error_indicators = [
-        "error:", "not available", "i cannot", "i'm sorry",
-        "i don't understand", "i cannot answer"
+        "error:",
+        "not available",
+        "i cannot",
+        "i'm sorry",
+        "i don't understand",
+        "i cannot answer",
     ]
 
     response_lower = response.lower()
@@ -82,11 +86,7 @@ def format_keywords_for_prompt(keywords: list[str]) -> str:
 
 
 def create_experiment_metadata(
-    provider: str,
-    model: str,
-    timestamp: str,
-    phase: int,
-    experiment_type: str
+    provider: str, model: str, timestamp: str, phase: int, experiment_type: str
 ) -> dict[str, Any]:
     """
     Create metadata for experiment tracking.
@@ -107,14 +107,12 @@ def create_experiment_metadata(
         "timestamp": timestamp,
         "framework_version": "1.0",
         "experiment_phase": phase,
-        "experiment_type": experiment_type
+        "experiment_type": experiment_type,
     }
 
 
 def clean_dataframe(
-    df: pd.DataFrame,
-    required_columns: list[str],
-    subset_columns: list[str] | None = None
+    df: pd.DataFrame, required_columns: list[str], subset_columns: list[str] | None = None
 ) -> pd.DataFrame:
     """
     Clean and validate a DataFrame.

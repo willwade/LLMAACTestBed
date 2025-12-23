@@ -39,7 +39,7 @@ class OpenAIClient(BaseLLMClient):
         system_prompt: str | None = None,
         temperature: float | None = None,
         max_tokens: int = 1000,
-        **kwargs: Any
+        **kwargs: Any,
     ) -> str:
         """Generate text using OpenAI."""
         messages = []
@@ -98,19 +98,16 @@ Missing the requested action (e.g., predicting generic pain when target is \"app
 Respond with only the number 1-10."""
 
         try:
-            response = self.generate(
-                judge_prompt,
-                temperature=0.0,
-                max_tokens=10
-            )
+            response = self.generate(judge_prompt, temperature=0.0, max_tokens=10)
 
             # Extract number from response
             import re
+
             raw_response = response.strip() if isinstance(response, str) else str(response)
             if os.getenv("LOG_JUDGE_RESPONSES") == "1":
                 print(f"[judge-debug] raw: {raw_response}")
 
-            match = re.search(r'\b(10|[1-9])\b', raw_response)
+            match = re.search(r"\b(10|[1-9])\b", raw_response)
             if match:
                 score = int(match.group(1))
                 return min(10, max(1, score))
@@ -125,7 +122,6 @@ Respond with only the number 1-10."""
     def provider_name(self) -> str:
         """Return the provider name."""
         return "openai"
-
 
     def get_model_info(self) -> dict[str, Any]:
         """

@@ -39,7 +39,7 @@ def save_json(data: Any, file_path: Path | str, indent: int = 2) -> None:
     file_path = Path(file_path)
     file_path.parent.mkdir(parents=True, exist_ok=True)
 
-    with open(file_path, 'w') as f:
+    with open(file_path, "w") as f:
         json.dump(data, f, indent=indent, default=str)
 
 

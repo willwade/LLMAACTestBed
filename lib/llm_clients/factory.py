@@ -23,10 +23,7 @@ class LLMClientFactory:
 
     @classmethod
     def create_client(
-        cls,
-        provider: str | None = None,
-        model: str | None = None,
-        **kwargs: Any
+        cls, provider: str | None = None, model: str | None = None, **kwargs: Any
     ) -> BaseLLMClient:
         """
         Create an LLM client based on provider.
@@ -45,7 +42,9 @@ class LLMClientFactory:
 
         provider = provider.lower()
         if provider not in cls._clients:
-            raise ValueError(f"Unknown provider: {provider}. Available: {list(cls._clients.keys())}")
+            raise ValueError(
+                f"Unknown provider: {provider}. Available: {list(cls._clients.keys())}"
+            )
 
         client_class = cls._clients[provider]
 
@@ -58,7 +57,9 @@ class LLMClientFactory:
 
         # Create client
         if provider == "gemini":
-            gemini_client: BaseLLMClient = client_class(model_name=model or "gemini-2.0-flash-exp", **kwargs)
+            gemini_client: BaseLLMClient = client_class(
+                model_name=model or "gemini-2.0-flash-exp", **kwargs
+            )
             return gemini_client
         elif provider == "openai":
             openai_client: BaseLLMClient = client_class(model=model or "gpt-4", **kwargs)
@@ -78,6 +79,8 @@ class LLMClientFactory:
         cls._clients[name.lower()] = client_class
 
 
-def create_llm_client(provider: str | None = None, model: str | None = None, **kwargs: Any) -> BaseLLMClient:
+def create_llm_client(
+    provider: str | None = None, model: str | None = None, **kwargs: Any
+) -> BaseLLMClient:
     """Convenience function to create an LLM client."""
     return LLMClientFactory.create_client(provider=provider, model=model, **kwargs)

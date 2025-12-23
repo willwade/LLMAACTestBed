@@ -49,11 +49,9 @@ class GeminiClient(BaseLLMClient):
         try:
             # Prepare options, avoiding temperature conflicts
             options = kwargs.copy()
-            options['temperature'] = self.temperature
+            options["temperature"] = self.temperature
 
-            response = self._gemini_client.prompt(
-                prompt, system=system_prompt, **options
-            )
+            response = self._gemini_client.prompt(prompt, system=system_prompt, **options)
             text = response.text().strip()
 
             # Clean thinking tags if present
@@ -91,7 +89,9 @@ Consider:
 Score:"""
 
         try:
-            response = self._gemini_judge_client.prompt(judge_prompt, system=judge_system, temperature=0.1)
+            response = self._gemini_judge_client.prompt(
+                judge_prompt, system=judge_system, temperature=0.1
+            )
             score_text = response.text().strip()
 
             # Extract numeric score

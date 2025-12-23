@@ -39,14 +39,14 @@ class ProfileEnhancedExperiment:
         self.config = load_config(config_path or "configs/profile_enhanced.yaml")
         self.logger = setup_logging(
             name="phase3_profile_enhanced",
-            level=self.config.get("logging", {}).get("level", "INFO")
+            level=self.config.get("logging", {}).get("level", "INFO"),
         )
 
         # Initialize LLM client
         llm_config = self.config.get("llm", {})
         self.llm_client = create_llm_client(
             provider=llm_provider or llm_config.get("provider"),
-            model=llm_model or llm_config.get("model")
+            model=llm_model or llm_config.get("model"),
         )
         self.logger.info(f"Using LLM: {self.llm_client.provider_name}:{self.llm_client.model_name}")
         self.chat_loader = ChatHistoryLoader()
@@ -73,7 +73,9 @@ class ProfileEnhancedExperiment:
             chats = data.get("chats") or data.get("conversations") or []
             if isinstance(chats, list):
                 return chats
-            self.logger.warning("Chat data not in expected list format; skipping profile-enhanced run")
+            self.logger.warning(
+                "Chat data not in expected list format; skipping profile-enhanced run"
+            )
             return []
         except Exception as exc:
             self.logger.warning(f"Failed to load chat data: {exc}")
@@ -112,6 +114,7 @@ class ProfileEnhancedExperiment:
             return {}
 
         import json
+
         with open(mappings_path) as f:
             mappings = json.load(f)
 
@@ -128,7 +131,7 @@ class ProfileEnhancedExperiment:
             "enhanced_chats": 0,
             "baseline_scores": [],
             "enhanced_scores": [],
-            "improvements": []
+            "improvements": [],
         }
 
         # Process each chat
@@ -161,9 +164,13 @@ class ProfileEnhancedExperiment:
 
         # Calculate summary statistics
         if results["improvements"]:
-            results["mean_improvement"] = sum(results["improvements"]) / len(results["improvements"])
+            results["mean_improvement"] = sum(results["improvements"]) / len(
+                results["improvements"]
+            )
             results["positive_improvements"] = sum(1 for imp in results["improvements"] if imp > 0)
-            results["improvement_rate"] = results["positive_improvements"] / len(results["improvements"])
+            results["improvement_rate"] = results["positive_improvements"] / len(
+                results["improvements"]
+            )
 
         self.logger.info(f"Experiment completed. Enhanced {results['enhanced_chats']} chats.")
         if results["improvements"]:
@@ -188,10 +195,12 @@ class ProfileEnhancedExperiment:
         context_messages = messages[:-2]  # Exclude last two for context
 
         # Build prompt from chat history only
-        context = "\n".join([
-            f"{msg.get('role', 'unknown')}: {msg['content']}"
-            for msg in context_messages[-5:]  # Last 5 messages
-        ])
+        context = "\n".join(
+            [
+                f"{msg.get('role', 'unknown')}: {msg['content']}"
+                for msg in context_messages[-5:]  # Last 5 messages
+            ]
+        )
 
         prompt = f"""Given this chat history:
 {context}
@@ -222,10 +231,9 @@ Predict the next message:"""
             if hasattr(self.context_builder, "_build_profile_context")
             else {}
         )
-        chat_context = "\n".join([
-            f"{msg.get('role', 'unknown')}: {msg['content']}"
-            for msg in context_messages[-5:]
-        ])
+        chat_context = "\n".join(
+            [f"{msg.get('role', 'unknown')}: {msg['content']}" for msg in context_messages[-5:]]
+        )
 
         prompt = f"""User Profile:
 {profile_context}
@@ -247,11 +255,13 @@ Predict the next message considering the user's profile:"""
         """Save experiment results."""
         if output_path is None:
             import datetime
+
             timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
             output_path = f"results/phase3_profile_enhanced_{timestamp}.json"
 
         import json
-        with open(output_path, 'w') as f:
+
+        with open(output_path, "w") as f:
             json.dump(results, f, indent=2)
 
         self.logger.info(f"Results saved to {output_path}")
@@ -264,8 +274,12 @@ def main():
     parser = argparse.ArgumentParser(description="Run Phase 3 Profile-Enhanced Experiment")
     parser.add_argument("--config", type=str, help="Path to config file")
     parser.add_argument("--output", type=str, help="Output path for results")
-    parser.add_argument("--provider", type=str, choices=["gemini", "openai"],
-                       help="LLM provider to use (overrides config)")
+    parser.add_argument(
+        "--provider",
+        type=str,
+        choices=["gemini", "openai"],
+        help="LLM provider to use (overrides config)",
+    )
     args = parser.parse_args()
 
     experiment = ProfileEnhancedExperiment(args.config, args.provider)

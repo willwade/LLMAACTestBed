@@ -32,33 +32,25 @@ def parse_arguments():
         type=str,
         choices=["gemini", "openai"],
         default="gemini",
-        help="LLM provider to use"
+        help="LLM provider to use",
     )
 
     parser.add_argument(
-        "--model",
-        type=str,
-        help="Specific model to use (default depends on provider)"
+        "--model", type=str, help="Specific model to use (default depends on provider)"
     )
 
     parser.add_argument(
         "--sample-size",
         type=int,
         default=5,
-        help="Number of keyword combinations to test (default: 5)"
+        help="Number of keyword combinations to test (default: 5)",
     )
 
     parser.add_argument(
-        "--output-dir",
-        type=str,
-        help="Output directory for results (default: results/timestamp)"
+        "--output-dir", type=str, help="Output directory for results (default: results/timestamp)"
     )
 
-    parser.add_argument(
-        "--verbose",
-        action="store_true",
-        help="Enable verbose logging"
-    )
+    parser.add_argument("--verbose", action="store_true", help="Enable verbose logging")
 
     return parser.parse_args()
 
@@ -90,7 +82,7 @@ def load_data():
     if not keywords_file:
         raise FileNotFoundError(f"Keywords file not found in {keyword_candidates}")
 
-    keywords_df = pd.read_csv(keywords_file, sep='\t')
+    keywords_df = pd.read_csv(keywords_file, sep="\t")
     keywords_df = keywords_df.rename(columns=lambda c: c.strip())
     if "Instruction " in keywords_df.columns and "Instruction" not in keywords_df.columns:
         keywords_df = keywords_df.rename(columns={"Instruction ": "Instruction"})
@@ -105,18 +97,22 @@ def load_data():
     keywords_df["Instruction"] = keywords_df["Instruction"].astype(str).str.strip()
     keywords_df = keywords_df[keywords_df["Instruction"] != ""]
     keyword_cols = ["Key word", "Key Word2", "Key Word3"]
-    keywords_df = keywords_df.dropna(how="all", subset=[c for c in keyword_cols if c in keywords_df.columns])
+    keywords_df = keywords_df.dropna(
+        how="all", subset=[c for c in keyword_cols if c in keywords_df.columns]
+    )
     # Check column names and print them for debugging
     print("Available columns:", list(keywords_df.columns))
 
     # Use correct column name (trailing space issue)
-    if 'Instruction ' in keywords_df.columns:
-        keywords_df = keywords_df.dropna(subset=['Instruction '])
-        keywords_df = keywords_df.rename(columns={'Instruction ': 'Instruction'})
-    elif 'Instruction' in keywords_df.columns:
-        keywords_df = keywords_df.dropna(subset=['Instruction'])
+    if "Instruction " in keywords_df.columns:
+        keywords_df = keywords_df.dropna(subset=["Instruction "])
+        keywords_df = keywords_df.rename(columns={"Instruction ": "Instruction"})
+    elif "Instruction" in keywords_df.columns:
+        keywords_df = keywords_df.dropna(subset=["Instruction"])
     else:
-        raise ValueError(f"Instruction column not found. Available columns: {list(keywords_df.columns)}")
+        raise ValueError(
+            f"Instruction column not found. Available columns: {list(keywords_df.columns)}"
+        )
 
     social_candidates = [
         real_dir / "social_graph.json",
@@ -135,8 +131,8 @@ def load_data():
 def extract_keywords(row):
     """Extract keywords from a DataFrame row."""
     keywords = []
-    for col in ['Key word ', 'Key Word2', 'Key Word3']:
-        if pd.notna(row[col]) and str(row[col]).strip().lower() != 'n/a':
+    for col in ["Key word ", "Key Word2", "Key Word3"]:
+        if pd.notna(row[col]) and str(row[col]).strip().lower() != "n/a":
             keywords.append(str(row[col]).strip())
     return keywords
 
@@ -231,7 +227,7 @@ def run_baseline_test(llm_client, keywords_df, sample_size=5):
 
     for idx, row in keywords_df.head(sample_size).iterrows():
         keywords = extract_keywords(row)
-        target = str(row['Instruction']).strip()
+        target = str(row["Instruction"]).strip()
 
         if not keywords or not target:
             continue
@@ -244,12 +240,9 @@ def run_baseline_test(llm_client, keywords_df, sample_size=5):
         score = evaluate_prediction(llm_client, prediction, target)
 
         # Store results
-        results.append({
-            "keywords": keywords,
-            "target": target,
-            "prediction": prediction,
-            "score": score
-        })
+        results.append(
+            {"keywords": keywords, "target": target, "prediction": prediction, "score": score}
+        )
 
         total_score += score
         print(f"Test {idx+1}: {keywords} -> Score: {score}/10")
@@ -269,7 +262,7 @@ def run_contextual_test(llm_client, keywords_df, social_graph, sample_size=5):
 
     for idx, row in keywords_df.head(sample_size).iterrows():
         keywords = extract_keywords(row)
-        target = str(row['Instruction']).strip()
+        target = str(row["Instruction"]).strip()
 
         if not keywords or not target:
             continue
@@ -285,13 +278,15 @@ def run_contextual_test(llm_client, keywords_df, social_graph, sample_size=5):
         score = evaluate_prediction(llm_client, prediction, target)
 
         # Store results
-        results.append({
-            "keywords": keywords,
-            "target": target,
-            "prediction": prediction,
-            "score": score,
-            "context": context
-        })
+        results.append(
+            {
+                "keywords": keywords,
+                "target": target,
+                "prediction": prediction,
+                "score": score,
+                "context": context,
+            }
+        )
 
         total_score += score
         print(f"Test {idx+1}: {keywords} with context -> Score: {score}/10")
@@ -338,24 +333,20 @@ def main():
         "experiment_info": {
             "timestamp": datetime.now().isoformat(),
             "llm_provider": llm_info,
-            "sample_size": len(keywords_df)
+            "sample_size": len(keywords_df),
         }
     }
 
     try:
         # Run baseline test
         baseline_results, baseline_score = run_baseline_test(client, keywords_df, args.sample_size)
-        all_results["baseline"] = {
-            "results": baseline_results,
-            "mean_score": baseline_score
-        }
+        all_results["baseline"] = {"results": baseline_results, "mean_score": baseline_score}
 
         # Run contextual test
-        contextual_results, contextual_score = run_contextual_test(client, keywords_df, social_graph, args.sample_size)
-        all_results["contextual"] = {
-            "results": contextual_results,
-            "mean_score": contextual_score
-        }
+        contextual_results, contextual_score = run_contextual_test(
+            client, keywords_df, social_graph, args.sample_size
+        )
+        all_results["contextual"] = {"results": contextual_results, "mean_score": contextual_score}
 
         # Calculate improvement
         improvement = contextual_score - baseline_score
@@ -363,7 +354,7 @@ def main():
         print(f"\n📊 Context improvement: {improvement:.2f} points")
 
         # Save results
-        with open(output_dir / "simple_results.json", 'w') as f:
+        with open(output_dir / "simple_results.json", "w") as f:
             json.dump(all_results, f, indent=2)
 
         print("\n✅ Simple experiment completed successfully!")

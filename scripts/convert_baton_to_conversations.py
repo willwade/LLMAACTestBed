@@ -53,7 +53,9 @@ def build_conversations(
     chat_index = 1
 
     for user, items in by_user.items():
-        items.sort(key=lambda x: parse_ts(x.get("metadata", [{}])[0].get("timestamp")) or dt.datetime.min)
+        items.sort(
+            key=lambda x: parse_ts(x.get("metadata", [{}])[0].get("timestamp")) or dt.datetime.min
+        )
         current: list[dict[str, Any]] = []
         last_ts: dt.datetime | None = None
 
@@ -96,7 +98,9 @@ def build_conversations(
     return convs
 
 
-def update_mappings(mappings_path: Path, chat_ids: list[str], profile: str = "dave_context") -> None:
+def update_mappings(
+    mappings_path: Path, chat_ids: list[str], profile: str = "dave_context"
+) -> None:
     existing: dict[str, str] = {}
     if mappings_path.exists():
         existing = json.loads(mappings_path.read_text())

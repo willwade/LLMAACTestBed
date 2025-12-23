@@ -17,7 +17,9 @@ class ContextBuilder:
         """Initialize context builder."""
         self.logger = logger
 
-    def build_context(self, level: str, social_graph: dict[str, Any], keywords: list[str]) -> dict[str, Any]:
+    def build_context(
+        self, level: str, social_graph: dict[str, Any], keywords: list[str]
+    ) -> dict[str, Any]:
         """
         Build context based on specified level.
 
@@ -112,10 +114,12 @@ class ContextBuilder:
         return {
             "people_present": ", ".join(people_present),
             "relationship_context": relationship_context.strip(),
-            "caregiver_type": "family" if "Kerry" in people_present else "professional"
+            "caregiver_type": "family" if "Kerry" in people_present else "professional",
         }
 
-    def _get_equipment_context(self, social_graph: dict[str, Any], keywords: list[str]) -> dict[str, Any]:
+    def _get_equipment_context(
+        self, social_graph: dict[str, Any], keywords: list[str]
+    ) -> dict[str, Any]:
         """Generate equipment context based on keywords and location."""
         equipment_context = ""
         nearby_equipment = []
@@ -132,7 +136,7 @@ class ContextBuilder:
             "Transfer": ["commode", "urinal_bottle"],
             "Sick": ["metal_bowl", "vomit_management"],
             "Table": ["adjustable_table", "overbed_table"],
-            "Chair": ["electric_chair", "positioning_cushion"]
+            "Chair": ["electric_chair", "positioning_cushion"],
         }
 
         # Find equipment relevant to keywords
@@ -153,10 +157,7 @@ class ContextBuilder:
         if unique_equipment:
             equipment_context = f"Nearby equipment: {', '.join(unique_equipment)}"
 
-        return {
-            "equipment_context": equipment_context,
-            "nearby_equipment": unique_equipment
-        }
+        return {"equipment_context": equipment_context, "nearby_equipment": unique_equipment}
 
     def _get_social_context(self, social_graph: dict[str, Any]) -> dict[str, Any]:
         """Generate social relationship context."""
@@ -170,7 +171,9 @@ class ContextBuilder:
         # Care team
         care_team = social_graph.get("care_team", {})
         if "professional_carers" in care_team:
-            context_parts.append("Care team: Professional carers with formal training, strong bonds formed")
+            context_parts.append(
+                "Care team: Professional carers with formal training, strong bonds formed"
+            )
 
         # Communication preferences
         interaction_prefs = social_graph.get("interaction_preferences", {})
@@ -186,7 +189,7 @@ class ContextBuilder:
 
         return {
             "social_context": " | ".join(context_parts),
-            "relationship_dynamics": "Strong family bonds, professional carer relationships built over time"
+            "relationship_dynamics": "Strong family bonds, professional carer relationships built over time",
         }
 
     def _get_time_context(self) -> str:
@@ -208,7 +211,9 @@ class ContextBuilder:
         else:
             return "night_time"
 
-    def _get_full_context(self, social_graph: dict[str, Any], keywords: list[str]) -> dict[str, Any]:
+    def _get_full_context(
+        self, social_graph: dict[str, Any], keywords: list[str]
+    ) -> dict[str, Any]:
         """Generate comprehensive context combining all elements."""
         context = {}
 
@@ -263,7 +268,7 @@ class ContextBuilder:
             "afternoon": "Resting or engaging in daytime activities",
             "after_school_family_time": "Evalyn just returned from school, family interaction time",
             "evening_family_time": "Family dinner and relaxation time",
-            "night_time": "Evening medications and bedtime preparation"
+            "night_time": "Evening medications and bedtime preparation",
         }
 
         return activities.get(time_context, "Daily care routine in progress")

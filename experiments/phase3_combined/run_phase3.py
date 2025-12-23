@@ -25,8 +25,13 @@ def main():
     load_env()
 
     parser = argparse.ArgumentParser(description="Run Phase 3 Combined Experiments")
-    parser.add_argument("--provider", type=str, choices=["gemini", "openai"],
-                       default="openai", help="LLM provider to use")
+    parser.add_argument(
+        "--provider",
+        type=str,
+        choices=["gemini", "openai"],
+        default="openai",
+        help="LLM provider to use",
+    )
     parser.add_argument("--model", type=str, default="gpt-4o-mini", help="LLM model to use")
     parser.add_argument("--config", type=str, help="Path to config file")
     parser.add_argument("--output", type=str, help="Output path for results")
@@ -47,11 +52,15 @@ def main():
         try:
             profile_module = importlib.import_module("profile_enhanced")
             ProfileEnhancedExperiment = getattr(profile_module, "ProfileEnhancedExperiment")
-            profile_config = args.config or str(Path(__file__).parent / "configs" / "profile_enhanced.yaml")
+            profile_config = args.config or str(
+                Path(__file__).parent / "configs" / "profile_enhanced.yaml"
+            )
             exp = ProfileEnhancedExperiment(profile_config, args.provider, args.model, max_chats=20)
             profile_results = exp.run_experiment()
             exp.save_results(profile_results, args.output)
-            print(f"[ok] Profile-Enhanced completed. Results: {len(profile_results.get('enhanced_scores', []))} evaluations")
+            print(
+                f"[ok] Profile-Enhanced completed. Results: {len(profile_results.get('enhanced_scores', []))} evaluations"
+            )
         except Exception as e:
             print(f"[error] Profile-Enhanced failed: {e}")
 
@@ -65,7 +74,9 @@ def main():
             exp = SocialContextExperiment(args.config, args.provider, max_chats=20)
             social_results = exp.run_experiment()
             exp.save_results(social_results, args.output)
-            print(f"[ok] Social Context completed. Results: {len(social_results.get('social_scores', []))} evaluations")
+            print(
+                f"[ok] Social Context completed. Results: {len(social_results.get('social_scores', []))} evaluations"
+            )
         except Exception as e:
             print(f"[error] Social Context failed: {e}")
 
@@ -91,7 +102,7 @@ User: Dave (MND patient)
         _plot_phase3_results(
             locals().get("profile_results"),
             locals().get("social_results"),
-            Path(args.output) if args.output else Path(".") / "results"
+            Path(args.output) if args.output else Path(".") / "results",
         )
     except Exception:
         pass
@@ -101,7 +112,11 @@ User: Dave (MND patient)
 
 if __name__ == "__main__":
     main()
-def _plot_phase3_results(profile_results: dict[str, Any] | None, social_results: dict[str, Any] | None, output_root: Path) -> None:
+
+
+def _plot_phase3_results(
+    profile_results: dict[str, Any] | None, social_results: dict[str, Any] | None, output_root: Path
+) -> None:
     """Generate simple plots for Phase 3 outputs."""
     try:
         import matplotlib

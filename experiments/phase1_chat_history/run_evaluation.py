@@ -10,7 +10,6 @@ Usage:
 """
 
 import argparse
-import os
 import sys
 from datetime import datetime
 from pathlib import Path
@@ -20,7 +19,7 @@ sys.path.insert(0, str(Path(__file__).parent.parent / "lib"))
 from evaluation.chat_history_evaluator import ChatHistoryEvaluator
 
 
-def create_default_methods():
+def create_default_methods(evaluator: ChatHistoryEvaluator):
     """Create default method dictionaries for partial generation, retrieval, and metrics."""
     # Partial utterance builders: how we truncate or sample the ground truth to simulate user input.
     partial_methods = {
@@ -32,10 +31,18 @@ def create_default_methods():
 
     # Completion generators: which retrieval strategy (or none) to supply to the LLM.
     generation_methods = {
-        "lexical": ChatHistoryEvaluator.generate_with_lexical_retrieval,
-        "tfidf": ChatHistoryEvaluator.generate_with_tfidf_retrieval,
-        "embedding": ChatHistoryEvaluator.generate_with_embedding_retrieval,
-        "context_only": ChatHistoryEvaluator.generate_with_context_only,
+        "lexical": lambda partial, context, n_candidates: evaluator.lexical_generate(
+            partial, context, top_k=3, n_candidates=n_candidates
+        ),
+        "tfidf": lambda partial, context, n_candidates: evaluator.tfidf_generate(
+            partial, context, top_k=3, n_candidates=n_candidates
+        ),
+        "embedding": lambda partial, context, n_candidates: evaluator.embedding_generate(
+            partial, context, top_k=3, n_candidates=n_candidates
+        ),
+        "context_only": lambda partial, context, n_candidates: evaluator.context_only_generate(
+            partial, context, n_candidates=n_candidates
+        ),
     }
 
     # Metrics that require evaluator state (embedding model or LLM judge).
@@ -49,7 +56,13 @@ def create_default_methods():
         "embedding_similarity": embedding_similarity_wrapper,
         "llm_judge_score": judge_similarity_wrapper,
         "character_accuracy": ChatHistoryEvaluator.calculate_character_accuracy,
+        "character_accuracy_ci": ChatHistoryEvaluator.calculate_character_accuracy_case_insensitive,
         "word_accuracy": ChatHistoryEvaluator.calculate_word_accuracy,
+        "word_precision": ChatHistoryEvaluator.calculate_word_precision,
+        "word_recall": ChatHistoryEvaluator.calculate_word_recall,
+        "word_f1": ChatHistoryEvaluator.calculate_word_f1,
+        "weighted_word_f1": ChatHistoryEvaluator.calculate_weighted_word_f1,
+        "completion_gain": ChatHistoryEvaluator.calculate_completion_gain,
     }
 
     return partial_methods, generation_methods, evaluation_metrics
@@ -126,6 +139,22 @@ def main():
         default=0,
         help="Number of previous test utterances to include as local conversation context",
     )
+    parser.add_argument(
+        "--deduplicate-corpus",
+        action="store_true",
+        help="Drop duplicate utterances before splitting corpus/test",
+    )
+    parser.add_argument(
+        "--skip-short-prefixes",
+        action="store_true",
+        help="Skip prefix_* partials when the utterance is too short to truncate",
+    )
+    parser.add_argument(
+        "--n-candidates",
+        type=int,
+        default=1,
+        help="Number of completions to generate per method (default: 1)",
+    )
 
     args = parser.parse_args()
 
@@ -164,13 +193,14 @@ def main():
             api_key=args.api_key,
             corpus_ratio=args.corpus_ratio,
             model_name=args.model,
+            deduplicate_corpus=args.deduplicate_corpus,
         )
     except Exception as e:
         print(f"Error initializing evaluator: {e}")
         sys.exit(1)
 
     # Get default methods
-    partial_methods, generation_methods, evaluation_metrics = create_default_methods()
+    partial_methods, generation_methods, evaluation_metrics = create_default_methods(evaluator)
 
     # Run evaluation
     try:
@@ -184,6 +214,8 @@ def main():
             time_window_hours=args.time_window_hours,
             geo_radius_km=args.geo_radius_km,
             conversation_window=args.conversation_window,
+            skip_short_prefixes=args.skip_short_prefixes,
+            n_candidates=args.n_candidates,
         )
 
         if results_df.empty:
@@ -220,15 +252,23 @@ def analyze_results(results_df, output_path):
     import matplotlib.pyplot as plt
     import seaborn as sns
 
+    mean_rows = results_df
+    if "row_kind" in results_df.columns:
+        mean_rows = results_df[results_df["row_kind"] == "aggregate"]
+        mean_rows = mean_rows[mean_rows.get("aggregate_type") == "mean"]
+        if mean_rows.empty:
+            mean_rows = results_df[results_df["row_kind"] == "candidate"]
+
     # Group by methods and calculate mean scores
     grouped_results = (
-        results_df.groupby(["partial_method", "generation_method"])
+        mean_rows.groupby(["partial_method", "generation_method"])
         .agg(
             {
                 "embedding_similarity": "mean",
                 "llm_judge_score": "mean",
                 "character_accuracy": "mean",
                 "word_accuracy": "mean",
+                "word_f1": "mean",
                 "target": "count",  # Count of samples
             }
         )
@@ -242,11 +282,12 @@ def analyze_results(results_df, output_path):
 
     # 1. Performance by partial method
     partial_perf = (
-        results_df.groupby("partial_method")
+        mean_rows.groupby("partial_method")
         .agg(
             {
                 "embedding_similarity": "mean",
                 "llm_judge_score": "mean",
+                "word_f1": "mean",
             }
         )
         .reset_index()
@@ -259,11 +300,12 @@ def analyze_results(results_df, output_path):
 
     # 2. Performance by generation method
     gen_perf = (
-        results_df.groupby("generation_method")
+        mean_rows.groupby("generation_method")
         .agg(
             {
                 "embedding_similarity": "mean",
                 "llm_judge_score": "mean",
+                "word_f1": "mean",
             }
         )
         .reset_index()
@@ -284,14 +326,14 @@ def analyze_results(results_df, output_path):
     axes[1, 0].set_title("Embedding Similarity by Method Combination")
 
     # 4. Score distribution
-    score_data = results_df.melt(
+    score_data = mean_rows.melt(
         id_vars=["partial_method", "generation_method"],
-        value_vars=["embedding_similarity", "llm_judge_score"],
+        value_vars=["embedding_similarity", "llm_judge_score", "word_f1"],
         var_name="metric",
         value_name="score",
     )
     sns.boxplot(data=score_data, x="metric", y="score", ax=axes[1, 1])
-    axes[1, 1].set_title("Score Distribution")
+    axes[1, 1].set_title("Score Distribution (mean rows)")
 
     plt.tight_layout()
     plt.savefig(output_path, dpi=300, bbox_inches="tight")
@@ -303,8 +345,17 @@ def print_summary(results_df):
     print("\nSummary Statistics:")
     print("-" * 50)
 
+    mean_rows = results_df
+    candidate_rows = results_df
+    if "row_kind" in results_df.columns:
+        candidate_rows = results_df[results_df["row_kind"] == "candidate"]
+        mean_rows = results_df[results_df["row_kind"] == "aggregate"]
+        mean_rows = mean_rows[mean_rows.get("aggregate_type") == "mean"]
+        if mean_rows.empty:
+            mean_rows = candidate_rows
+
     # Overall statistics
-    print(f"Total evaluations: {len(results_df)}")
+    print(f"Total evaluations (candidate rows): {len(candidate_rows)}")
 
     # Best and worst performers for each metric
     metrics = [
@@ -312,16 +363,19 @@ def print_summary(results_df):
         "llm_judge_score",
         "character_accuracy",
         "word_accuracy",
+        "word_f1",
     ]
     for metric in metrics:
-        if metric in results_df.columns:
-            best_idx = results_df[metric].idxmax()
-            worst_idx = results_df[metric].idxmin()
+        if metric in mean_rows.columns and not mean_rows.empty:
+            best_idx = mean_rows[metric].idxmax()
+            worst_idx = mean_rows[metric].idxmin()
 
-            best_row = results_df.loc[best_idx]
-            worst_row = results_df.loc[worst_idx]
+            best_row = mean_rows.loc[best_idx]
+            worst_row = mean_rows.loc[worst_idx]
 
-            print(f"\n{metric.replace('_', ' ').title()}:")
+            print(
+                f"\n{metric.replace('_', ' ').title()}: (based on aggregate means where available)"
+            )
             print(
                 f"  Best: {best_row['partial_method']} + {best_row['generation_method']} ({best_row[metric]:.3f})"
             )
@@ -332,13 +386,14 @@ def print_summary(results_df):
     # Method averages
     print("\nMethod Averages:")
     partial_avg = (
-        results_df.groupby("partial_method")
+        mean_rows.groupby("partial_method")
         .agg(
             {
                 "embedding_similarity": "mean",
                 "llm_judge_score": "mean",
                 "character_accuracy": "mean",
                 "word_accuracy": "mean",
+                "word_f1": "mean",
             }
         )
         .round(3)
@@ -346,13 +401,14 @@ def print_summary(results_df):
     print(partial_avg)
 
     gen_avg = (
-        results_df.groupby("generation_method")
+        mean_rows.groupby("generation_method")
         .agg(
             {
                 "embedding_similarity": "mean",
                 "llm_judge_score": "mean",
                 "character_accuracy": "mean",
                 "word_accuracy": "mean",
+                "word_f1": "mean",
             }
         )
         .round(3)

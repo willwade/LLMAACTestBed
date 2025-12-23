@@ -40,39 +40,31 @@ def parse_arguments():
         type=str,
         choices=["gemini", "openai"],
         default="gemini",
-        help="LLM provider to use"
+        help="LLM provider to use",
     )
 
     parser.add_argument(
-        "--model",
-        type=str,
-        help="Specific model to use (default depends on provider)"
+        "--model", type=str, help="Specific model to use (default depends on provider)"
     )
 
     parser.add_argument(
         "--part",
         type=int,
         choices=[1, 2, 3],
-        help="Run specific part (1=baseline, 2=contextual, 3=single_keyword)"
+        help="Run specific part (1=baseline, 2=contextual, 3=single_keyword)",
     )
 
     parser.add_argument(
         "--sample-size",
         type=int,
-        help="Limit number of keyword combinations to test (for debugging)"
+        help="Limit number of keyword combinations to test (for debugging)",
     )
 
     parser.add_argument(
-        "--output-dir",
-        type=str,
-        help="Output directory for results (default: results/timestamp)"
+        "--output-dir", type=str, help="Output directory for results (default: results/timestamp)"
     )
 
-    parser.add_argument(
-        "--verbose",
-        action="store_true",
-        help="Enable verbose logging"
-    )
+    parser.add_argument("--verbose", action="store_true", help="Enable verbose logging")
 
     return parser.parse_args()
 
@@ -120,14 +112,11 @@ def run_part1_baseline(evaluator, keywords_df, output_dir, sample_size=None):
     """Run Part 1: Baseline keyword testing without context."""
     print("\n=== Part 1: Baseline Testing (Keywords Only) ===")
 
-    results = evaluator.run_baseline_test(
-        keywords_df=keywords_df,
-        sample_size=sample_size
-    )
+    results = evaluator.run_baseline_test(keywords_df=keywords_df, sample_size=sample_size)
 
     # Save results
     output_file = output_dir / "part1_baseline_results.json"
-    with open(output_file, 'w') as f:
+    with open(output_file, "w") as f:
         json.dump(results, f, indent=2)
 
     print(f"Baseline results saved to: {output_file}")
@@ -139,14 +128,12 @@ def run_part2_contextual(evaluator, keywords_df, social_graph, output_dir, sampl
     print("\n=== Part 2: Contextual Enhancement Testing ===")
 
     results = evaluator.run_contextual_test(
-        keywords_df=keywords_df,
-        social_graph=social_graph,
-        sample_size=sample_size
+        keywords_df=keywords_df, social_graph=social_graph, sample_size=sample_size
     )
 
     # Save results
     output_file = output_dir / "part2_contextual_results.json"
-    with open(output_file, 'w') as f:
+    with open(output_file, "w") as f:
         json.dump(results, f, indent=2)
 
     print(f"Contextual results saved to: {output_file}")
@@ -158,30 +145,30 @@ def run_part3_single_keyword(evaluator, keywords_df, social_graph, output_dir, s
     print("\n=== Part 3: Single Keyword Testing ===")
 
     results = evaluator.run_single_keyword_test(
-        keywords_df=keywords_df,
-        social_graph=social_graph,
-        sample_size=sample_size
+        keywords_df=keywords_df, social_graph=social_graph, sample_size=sample_size
     )
 
     # Save results
     output_file = output_dir / "part3_single_keyword_results.json"
-    with open(output_file, 'w') as f:
+    with open(output_file, "w") as f:
         json.dump(results, f, indent=2)
 
     print(f"Single keyword results saved to: {output_file}")
     return results
 
 
-def generate_summary_report(all_results: dict[str, Any], output_dir: Path, llm_info: dict[str, str]) -> None:
+def generate_summary_report(
+    all_results: dict[str, Any], output_dir: Path, llm_info: dict[str, str]
+) -> None:
     """Generate summary report with all results."""
     summary = {
         "experiment_info": {
             "timestamp": datetime.now().isoformat(),
             "llm_provider": llm_info,
-            "experiment_parts": list(all_results.keys())
+            "experiment_parts": list(all_results.keys()),
         },
         "summary_statistics": {},
-        "detailed_results": all_results
+        "detailed_results": all_results,
     }
 
     # Calculate summary statistics
@@ -195,7 +182,7 @@ def generate_summary_report(all_results: dict[str, Any], output_dir: Path, llm_i
                 "max_score": max(scores),
                 "min_score": min(scores),
                 "scores_over_7": sum(1 for s in scores if s >= 7),
-                "accuracy_over_70_percent": sum(1 for s in scores if s >= 7) / len(scores) * 100
+                "accuracy_over_70_percent": sum(1 for s in scores if s >= 7) / len(scores) * 100,
             }
             if part_name == "part1_baseline":
                 baseline_mean = summary["summary_statistics"][part_name]["mean_score"]
@@ -216,7 +203,9 @@ def generate_summary_report(all_results: dict[str, Any], output_dir: Path, llm_i
                     "max_score": max(all_scores),
                     "min_score": min(all_scores),
                     "scores_over_7": sum(1 for s in all_scores if s >= 7),
-                    "accuracy_over_70_percent": sum(1 for s in all_scores if s >= 7) / len(all_scores) * 100,
+                    "accuracy_over_70_percent": sum(1 for s in all_scores if s >= 7)
+                    / len(all_scores)
+                    * 100,
                     "level_means": level_means,
                 }
                 if baseline_mean is not None:
@@ -235,14 +224,18 @@ def generate_summary_report(all_results: dict[str, Any], output_dir: Path, llm_i
                     "max_score": max(scores),
                     "min_score": min(scores),
                     "scores_over_7": sum(1 for s in scores if s >= 7),
-                    "accuracy_over_70_percent": sum(1 for s in scores if s >= 7) / len(scores) * 100,
+                    "accuracy_over_70_percent": sum(1 for s in scores if s >= 7)
+                    / len(scores)
+                    * 100,
                 }
                 if baseline_mean is not None:
-                    summary["summary_statistics"][part_name]["delta_vs_baseline"] = summary["summary_statistics"][part_name]["mean_score"] - baseline_mean
+                    summary["summary_statistics"][part_name]["delta_vs_baseline"] = (
+                        summary["summary_statistics"][part_name]["mean_score"] - baseline_mean
+                    )
 
     # Save summary
     summary_file = output_dir / "experiment_summary.json"
-    with open(summary_file, 'w') as f:
+    with open(summary_file, "w") as f:
         json.dump(summary, f, indent=2)
 
     print(f"\n[summary] Report saved to: {summary_file}")
@@ -251,7 +244,7 @@ def generate_summary_report(all_results: dict[str, Any], output_dir: Path, llm_i
     print("\n=== EXPERIMENT SUMMARY ===")
     for part_name, stats in summary["summary_statistics"].items():
         # Ensure stats is a dictionary with expected keys
-        if isinstance(stats, dict) and 'total_tests' in stats:
+        if isinstance(stats, dict) and "total_tests" in stats:
             print(f"\n{part_name.upper()}:")
             print(f"  Total tests: {stats['total_tests']}")
             print(f"  Mean score: {stats['mean_score']:.2f}/10")
@@ -295,7 +288,7 @@ def main():
     evaluator = KeywordEvaluator(client, logger)
 
     # Load data
-    keywords_df = pd.read_csv(keywords_file, sep='\t')
+    keywords_df = pd.read_csv(keywords_file, sep="\t")
     # Normalize column names from real TSV (remove trailing spaces)
     keywords_df = keywords_df.rename(columns=lambda c: c.strip())
     # Standardize instruction column
@@ -314,7 +307,9 @@ def main():
     keywords_df["Instruction"] = keywords_df["Instruction"].astype(str).str.strip()
     keywords_df = keywords_df[keywords_df["Instruction"] != ""]
     keyword_cols = ["Key word", "Key Word2", "Key Word3"]
-    keywords_df = keywords_df.dropna(how="all", subset=[c for c in keyword_cols if c in keywords_df.columns])
+    keywords_df = keywords_df.dropna(
+        how="all", subset=[c for c in keyword_cols if c in keywords_df.columns]
+    )
 
     logger.info(f"Loaded {len(keywords_df)} keyword combinations")
 

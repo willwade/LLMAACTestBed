@@ -385,9 +385,7 @@ def main():
     parser.add_argument(
         "--output", type=str, default="../../data/synthetic/outputs", help="Output directory"
     )
-    parser.add_argument(
-        "--model", type=str, default="gpt-4o-mini", help="LLM model to use"
-    )
+    parser.add_argument("--model", type=str, default="gpt-4o-mini", help="LLM model to use")
     parser.add_argument(
         "--provider", type=str, default="openai", choices=["openai", "gemini"], help="LLM provider"
     )

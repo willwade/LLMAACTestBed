@@ -4,6 +4,7 @@ Social context experiment for Phase 3.
 Tests if social graph information improves prediction accuracy
 by adding relationship context to chat history.
 """
+
 import json
 import sys
 from pathlib import Path
@@ -43,7 +44,9 @@ class SocialContextExperiment:
         )
 
         # Initialize components
-        llm_provider = provider or (self.config.get("llm.provider") if isinstance(self.config, Config) else None)
+        llm_provider = provider or (
+            self.config.get("llm.provider") if isinstance(self.config, Config) else None
+        )
         llm_model = self.config.get("llm.model") if isinstance(self.config, Config) else None
         self.llm_client = create_llm_client(provider=llm_provider, model=llm_model)
         self.chat_loader = ChatHistoryLoader()
@@ -69,7 +72,9 @@ class SocialContextExperiment:
             chats = data.get("chats") or data.get("conversations") or []
             if isinstance(chats, list):
                 return chats
-            self.logger.warning("Chat data not in expected conversation format; skipping social context run")
+            self.logger.warning(
+                "Chat data not in expected conversation format; skipping social context run"
+            )
             return []
         except Exception as exc:
             self.logger.warning(f"Failed to load chat data: {exc}")
@@ -97,6 +102,7 @@ class SocialContextExperiment:
 
         graphs = {}
         import json
+
         for graph_file in graphs_path.glob("*.json"):
             with open(graph_file) as f:
                 graph = json.load(f)
@@ -117,7 +123,7 @@ class SocialContextExperiment:
             "baseline_scores": [],
             "social_scores": [],
             "energy_costs": [],
-            "improvements": []
+            "improvements": [],
         }
 
         # Process each chat
@@ -148,10 +154,16 @@ class SocialContextExperiment:
 
         # Calculate statistics
         if results["improvements"]:
-            results["mean_improvement"] = sum(results["improvements"]) / len(results["improvements"])
-            results["mean_energy_cost"] = sum(results["energy_costs"]) / len(results["energy_costs"])
+            results["mean_improvement"] = sum(results["improvements"]) / len(
+                results["improvements"]
+            )
+            results["mean_energy_cost"] = sum(results["energy_costs"]) / len(
+                results["energy_costs"]
+            )
             results["positive_improvements"] = sum(1 for imp in results["improvements"] if imp > 0)
-            results["improvement_rate"] = results["positive_improvements"] / len(results["improvements"])
+            results["improvement_rate"] = results["positive_improvements"] / len(
+                results["improvements"]
+            )
 
         self.logger.info(f"Social context enhanced {results['social_enhanced']} chats")
         if results["improvements"]:
@@ -180,10 +192,9 @@ class SocialContextExperiment:
             return 0.0
 
         target = messages[-1]["content"]
-        context = "\n".join([
-            f"{msg.get('role', 'unknown')}: {msg['content']}"
-            for msg in messages[-5:-1]
-        ])
+        context = "\n".join(
+            [f"{msg.get('role', 'unknown')}: {msg['content']}" for msg in messages[-5:-1]]
+        )
 
         prompt = f"Chat history:\n{context}\n\nPredict next message:"
 
@@ -194,7 +205,9 @@ class SocialContextExperiment:
         except Exception:
             return 0.0
 
-    def _evaluate_with_social(self, chat: dict, social_graph: dict, interlocutor: str | None) -> dict:
+    def _evaluate_with_social(
+        self, chat: dict, social_graph: dict, interlocutor: str | None
+    ) -> dict:
         """Evaluate with social context and calculate energy cost."""
         messages = chat.get("messages", [])
         if len(messages) < 2:
@@ -208,10 +221,9 @@ class SocialContextExperiment:
         # Calculate energy cost
         energy_cost = self._calculate_energy_cost(social_graph, interlocutor)
 
-        chat_history = "\n".join([
-            f"{msg.get('role', 'unknown')}: {msg['content']}"
-            for msg in messages[-5:-1]
-        ])
+        chat_history = "\n".join(
+            [f"{msg.get('role', 'unknown')}: {msg['content']}" for msg in messages[-5:-1]]
+        )
 
         prompt = f"""Social Context:
 {social_context}
@@ -224,10 +236,7 @@ Predict next message considering the relationship:"""
         try:
             prediction = self.llm_client.generate(prompt)
             score = self.llm_client.judge_similarity(target, prediction)
-            return {
-                "score": score / 100.0,
-                "energy_cost": energy_cost
-            }
+            return {"score": score / 100.0, "energy_cost": energy_cost}
         except Exception:
             return {"score": 0.0, "energy_cost": energy_cost}
 
@@ -254,7 +263,9 @@ Predict next message considering the relationship:"""
                 f"formality: {prefs.get('formality', 'neutral')}"
             )
 
-        return "\n".join(context_parts) if context_parts else "No specific social context available."
+        return (
+            "\n".join(context_parts) if context_parts else "No specific social context available."
+        )
 
     def _calculate_energy_cost(self, social_graph: dict, interlocutor: str | None) -> float:
         """Calculate energy cost for social interaction."""
@@ -274,11 +285,13 @@ Predict next message considering the relationship:"""
         """Save experiment results."""
         if output_path is None:
             import datetime
+
             timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
             output_path = f"results/phase3_social_context_{timestamp}.json"
 
         import json
-        with open(output_path, 'w') as f:
+
+        with open(output_path, "w") as f:
             json.dump(results, f, indent=2)
 
         self.logger.info(f"Results saved to {output_path}")

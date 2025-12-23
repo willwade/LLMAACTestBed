@@ -9,15 +9,15 @@ This script shows how to:
 4. Analyze and visualize results
 """
 
-import os
 import sys
+from pathlib import Path
 
 # Add project root to path for lib imports
 project_root = Path(__file__).parent.parent.parent
 sys.path.insert(0, str(project_root))
 
-import matplotlib.pyplot as plt
-from lib.evaluation.chat_history_evaluator import ChatHistoryEvaluator
+import matplotlib.pyplot as plt  # noqa: E402, I001
+from lib.evaluation.chat_history_evaluator import ChatHistoryEvaluator  # noqa: E402, I001
 
 
 def main():

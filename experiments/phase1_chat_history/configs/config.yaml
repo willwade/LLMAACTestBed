@@ -14,7 +14,7 @@ model:
 
 # Evaluation Parameters
 evaluation:
-  sample_size: 10 # Number of test examples to evaluate (null for all)
+  sample_size: null # Number of test examples to evaluate (null for all)
   partial_utterance_methods:
     prefix_3:
       type: "prefix"
@@ -41,6 +41,9 @@ evaluation:
       top_k: 3
     context_only:
       type: "context_only"
+    defaults:
+      n_candidates: 3
+      skip_short_prefixes: true
   evaluation_metrics:
     embedding_similarity:
       enabled: true
@@ -48,7 +51,19 @@ evaluation:
       enabled: true
     character_accuracy:
       enabled: true
+    character_accuracy_ci:
+      enabled: true
     word_accuracy:
+      enabled: true
+    word_precision:
+      enabled: true
+    word_recall:
+      enabled: true
+    word_f1:
+      enabled: true
+    weighted_word_f1:
+      enabled: true
+    completion_gain:
       enabled: true
 
 # Output Configuration

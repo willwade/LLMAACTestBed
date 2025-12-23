@@ -25,8 +25,10 @@ The evaluation framework:
 ### Evaluation Metrics
 - **Embedding Similarity**: Sentence-level similarity using embeddings
 - **LLM-Judge Scoring**: Semantic evaluation using an LLM
-- **Character Accuracy**: Character-level accuracy
-- **Word Accuracy**: Word-level accuracy
+- **Character Accuracy**: Character-level accuracy (case-sensitive and case-insensitive variants)
+- **Word Precision/Recall/F1**: Word overlap precision, recall, and F1
+- **Weighted Word F1**: Word F1 scaled by how much of the target remained after the partial
+- **Completion Gain**: Fraction of remaining target words correctly added beyond the partial
 
 ## Installation
 
@@ -44,13 +46,14 @@ pip install -r requirements.txt
 ### Command Line Interface
 
 ```bash
-# Basic usage
+# Basic usage (process all test rows)
 python run_evaluation.py --data path/to/chat_data.json
 
-# With custom parameters
+# Recommended defaults: 3 candidates, skip too-short prefixes
 python run_evaluation.py \
   --data path/to/chat_data.json \
-  --sample-size 100 \
+  --n-candidates 3 \
+  --skip-short-prefixes \
   --output results.csv \
   --visualize
 
@@ -63,6 +66,8 @@ python run_evaluation.py \
 # With contextual filters and conversation window
 python run_evaluation.py \
   --data path/to/chat_data.json \
+  --n-candidates 3 \
+  --skip-short-prefixes \
   --context-filter time_geo \
   --time-window-hours 2 \
   --geo-radius-km 5 \
@@ -89,13 +94,16 @@ partial_methods = {
 }
 
 generation_methods = {
-    'lexical': evaluator.generate_with_lexical_retrieval,
-    'embedding': evaluator.generate_with_embedding_retrieval
+    'lexical': lambda partial, context, n: evaluator.lexical_generate(partial, context, top_k=3, n_candidates=n),
+    'embedding': lambda partial, context, n: evaluator.embedding_generate(partial, context, top_k=3, n_candidates=n)
 }
 
 evaluation_metrics = {
     'embedding_similarity': evaluator.calculate_embedding_similarity,
-    'llm_judge_score': evaluator.judge_similarity
+    'llm_judge_score': evaluator.judge_similarity,
+    'word_f1': evaluator.calculate_word_f1,
+    'weighted_word_f1': lambda target, proposal, partial: evaluator.calculate_weighted_word_f1(target, proposal, partial),
+    'completion_gain': lambda target, proposal, partial: evaluator.calculate_completion_gain(target, proposal, partial)
 }
 
 # Run evaluation
@@ -103,7 +111,9 @@ results = evaluator.run_evaluation(
     partial_methods=partial_methods,
     generation_methods=generation_methods,
     evaluation_metrics=evaluation_metrics,
-    sample_size=100,
+    sample_size=None,  # use all rows
+    n_candidates=3,
+    skip_short_prefixes=True,
     context_filter="time_geo",
     time_window_hours=2,
     geo_radius_km=5,

@@ -21,11 +21,7 @@ class ResultsAggregator:
         self.phase_results = {}
         self.combined_results = None
 
-    def load_phase_results(
-        self,
-        phase_name: str,
-        results_path: str | Path
-    ) -> pd.DataFrame:
+    def load_phase_results(self, phase_name: str, results_path: str | Path) -> pd.DataFrame:
         """
         Load results from a specific phase.
 
@@ -39,11 +35,11 @@ class ResultsAggregator:
         results_df = pd.read_csv(results_path)
 
         # Add phase column if not present
-        if 'phase' not in results_df.columns:
-            results_df['phase'] = phase_name
+        if "phase" not in results_df.columns:
+            results_df["phase"] = phase_name
 
         # Add load timestamp
-        results_df['load_timestamp'] = datetime.now()
+        results_df["load_timestamp"] = datetime.now()
 
         self.phase_results[phase_name] = results_df
         return results_df
@@ -62,8 +58,8 @@ class ResultsAggregator:
         combined_dfs = []
         for phase_name, results_df in self.phase_results.items():
             df = results_df.copy()
-            if 'phase' not in df.columns:
-                df['phase'] = phase_name
+            if "phase" not in df.columns:
+                df["phase"] = phase_name
             combined_dfs.append(df)
 
         self.combined_results = pd.concat(combined_dfs, ignore_index=True)
@@ -87,50 +83,50 @@ class ResultsAggregator:
         summary = {}
 
         # Overall statistics
-        summary['total_evaluations'] = len(results_df)
-        summary['phases'] = results_df['phase'].unique().tolist() if 'phase' in results_df else []
+        summary["total_evaluations"] = len(results_df)
+        summary["phases"] = results_df["phase"].unique().tolist() if "phase" in results_df else []
 
         # Metric columns
-        metric_cols = [col for col in results_df.columns
-                      if any(suffix in col.lower() for suffix in
-                             ['similarity', 'score', 'accuracy', 'bleu'])]
+        metric_cols = [
+            col
+            for col in results_df.columns
+            if any(suffix in col.lower() for suffix in ["similarity", "score", "accuracy", "bleu"])
+        ]
 
         # Statistics by metric
         for metric in metric_cols:
             if metric in results_df.columns:
                 metric_data = results_df[metric].dropna()
                 if len(metric_data) > 0:
-                    summary[f'{metric}_stats'] = {
-                        'mean': metric_data.mean(),
-                        'std': metric_data.std(),
-                        'min': metric_data.min(),
-                        'max': metric_data.max(),
-                        'median': metric_data.median(),
-                        'count': len(metric_data)
+                    summary[f"{metric}_stats"] = {
+                        "mean": metric_data.mean(),
+                        "std": metric_data.std(),
+                        "min": metric_data.min(),
+                        "max": metric_data.max(),
+                        "median": metric_data.median(),
+                        "count": len(metric_data),
                     }
 
         # Statistics by phase
-        if 'phase' in results_df.columns:
-            summary['by_phase'] = {}
-            for phase in results_df['phase'].unique():
-                phase_df = results_df[results_df['phase'] == phase]
+        if "phase" in results_df.columns:
+            summary["by_phase"] = {}
+            for phase in results_df["phase"].unique():
+                phase_df = results_df[results_df["phase"] == phase]
                 phase_stats = {}
 
                 for metric in metric_cols:
                     if metric in phase_df.columns:
                         metric_data = phase_df[metric].dropna()
                         if len(metric_data) > 0:
-                            phase_stats[f'{metric}_mean'] = metric_data.mean()
-                            phase_stats[f'{metric}_std'] = metric_data.std()
+                            phase_stats[f"{metric}_mean"] = metric_data.mean()
+                            phase_stats[f"{metric}_std"] = metric_data.std()
 
-                summary['by_phase'][phase] = phase_stats
+                summary["by_phase"][phase] = phase_stats
 
         return summary
 
     def compare_methods(
-        self,
-        results_df: pd.DataFrame | None = None,
-        metric: str = 'embedding_similarity'
+        self, results_df: pd.DataFrame | None = None, metric: str = "embedding_similarity"
     ) -> pd.DataFrame:
         """
         Compare performance across different methods.
@@ -149,23 +145,21 @@ class ResultsAggregator:
 
         # Group by method combinations
         grouping_cols = []
-        for col in ['partial_method', 'generation_method', 'hypothesis', 'context_type']:
+        for col in ["partial_method", "generation_method", "hypothesis", "context_type"]:
             if col in results_df.columns:
                 grouping_cols.append(col)
 
         if not grouping_cols:
             # Simple comparison by phase
-            comparison = results_df.groupby('phase')[metric].agg(['mean', 'std', 'count'])
+            comparison = results_df.groupby("phase")[metric].agg(["mean", "std", "count"])
         else:
             # Complex comparison by methods
-            comparison = results_df.groupby(grouping_cols)[metric].agg(['mean', 'std', 'count'])
+            comparison = results_df.groupby(grouping_cols)[metric].agg(["mean", "std", "count"])
 
         return comparison.reset_index()
 
     def find_best_performers(
-        self,
-        results_df: pd.DataFrame | None = None,
-        metric: str = 'embedding_similarity'
+        self, results_df: pd.DataFrame | None = None, metric: str = "embedding_similarity"
     ) -> dict[str, Any]:
         """
         Find best performing configurations.
@@ -188,21 +182,18 @@ class ResultsAggregator:
         best_overall = results_df.loc[results_df[metric].idxmax()].to_dict()
 
         best_by_phase = {}
-        if 'phase' in results_df.columns:
-            for phase in results_df['phase'].unique():
-                phase_df = results_df[results_df['phase'] == phase]
+        if "phase" in results_df.columns:
+            for phase in results_df["phase"].unique():
+                phase_df = results_df[results_df["phase"] == phase]
                 best_by_phase[phase] = phase_df.loc[phase_df[metric].idxmax()].to_dict()
 
         return {
-            'best_overall': best_overall,
-            'best_by_phase': best_by_phase,
-            'best_score': best_overall[metric]
+            "best_overall": best_overall,
+            "best_by_phase": best_by_phase,
+            "best_score": best_overall[metric],
         }
 
-    def generate_comparison_table(
-        self,
-        results_df: pd.DataFrame | None = None
-    ) -> pd.DataFrame:
+    def generate_comparison_table(self, results_df: pd.DataFrame | None = None) -> pd.DataFrame:
         """
         Generate a comparison table for research paper.
 
@@ -221,33 +212,33 @@ class ResultsAggregator:
         table_data = []
 
         # Get unique method combinations
-        if 'phase' in results_df.columns:
-            for phase in results_df['phase'].unique():
-                phase_df = results_df[results_df['phase'] == phase]
+        if "phase" in results_df.columns:
+            for phase in results_df["phase"].unique():
+                phase_df = results_df[results_df["phase"] == phase]
                 self._add_phase_to_table(phase_df, phase, table_data)
         else:
-            self._add_phase_to_table(results_df, 'combined', table_data)
+            self._add_phase_to_table(results_df, "combined", table_data)
 
         comparison_df = pd.DataFrame(table_data)
 
         # Sort by score
-        score_cols = [col for col in comparison_df.columns
-                     if 'similarity' in col or 'score' in col or 'accuracy' in col]
+        score_cols = [
+            col
+            for col in comparison_df.columns
+            if "similarity" in col or "score" in col or "accuracy" in col
+        ]
         if score_cols:
             comparison_df = comparison_df.sort_values(score_cols[0], ascending=False)
 
         return comparison_df
 
     def _add_phase_to_table(
-        self,
-        phase_df: pd.DataFrame,
-        phase_name: str,
-        table_data: list[dict[str, Any]]
+        self, phase_df: pd.DataFrame, phase_name: str, table_data: list[dict[str, Any]]
     ):
         """Add phase data to comparison table."""
         # Group by methods
         grouping_cols = []
-        for col in ['partial_method', 'generation_method', 'hypothesis', 'context_type']:
+        for col in ["partial_method", "generation_method", "hypothesis", "context_type"]:
             if col in phase_df.columns:
                 grouping_cols.append(col)
 
@@ -259,7 +250,7 @@ class ResultsAggregator:
 
         for group_key, group_df in grouped:
             # Calculate metrics
-            row = {'phase': phase_name}
+            row = {"phase": phase_name}
 
             if group_key:
                 if isinstance(group_key, tuple):
@@ -269,14 +260,18 @@ class ResultsAggregator:
                     row[grouping_cols[0]] = group_key
 
             # Add metric averages
-            metric_cols = [col for col in group_df.columns
-                          if any(suffix in col.lower() for suffix in
-                                 ['similarity', 'score', 'accuracy', 'bleu'])]
+            metric_cols = [
+                col
+                for col in group_df.columns
+                if any(
+                    suffix in col.lower() for suffix in ["similarity", "score", "accuracy", "bleu"]
+                )
+            ]
 
             for metric in metric_cols:
                 if metric in group_df.columns:
-                    row[f'{metric}_mean'] = group_df[metric].mean()
-                    row[f'{metric}_std'] = group_df[metric].std()
-                    row[f'{metric}_count'] = len(group_df)
+                    row[f"{metric}_mean"] = group_df[metric].mean()
+                    row[f"{metric}_std"] = group_df[metric].std()
+                    row[f"{metric}_count"] = len(group_df)
 
             table_data.append(row)

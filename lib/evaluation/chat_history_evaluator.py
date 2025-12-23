@@ -9,8 +9,9 @@ import json
 import math
 import warnings
 from collections import Counter
+from collections.abc import Callable
 from datetime import datetime
-from typing import Any, Callable
+from typing import Any
 
 import numpy as np
 import pandas as pd
@@ -43,6 +44,7 @@ class ChatHistoryEvaluator:
         corpus_ratio: float = 0.67,
         model_name: str = "gemini-2.0-flash-exp",
         llm_provider: str | None = None,
+        deduplicate_corpus: bool = False,
     ):
         """
         Initialize evaluator, models, and dataset split.
@@ -53,6 +55,7 @@ class ChatHistoryEvaluator:
             corpus_ratio: Fraction of data to use as corpus (default 0.67).
             model_name: Name of the generative model to use.
             llm_provider: LLM provider (gemini, openai, etc.)
+            deduplicate_corpus: If True, drop duplicate utterances before splitting.
         """
         # Load environment variables
         load_env()
@@ -60,6 +63,7 @@ class ChatHistoryEvaluator:
         self.chat_data_path = chat_data_path
         self.corpus_ratio = corpus_ratio
         self.model_name = model_name
+        self.deduplicate_corpus = deduplicate_corpus
         self.embedding_model = SentenceTransformer("all-MiniLM-L6-v2")
 
         # Initialize LLM client
@@ -71,10 +75,7 @@ class ChatHistoryEvaluator:
             elif lower_name.startswith("gpt") or lower_name.startswith("o"):
                 provider = "openai"
 
-        self.llm_client = create_llm_client(
-            provider=provider,
-            model=model_name
-        )
+        self.llm_client = create_llm_client(provider=provider, model=model_name)
 
         # Load and preprocess data
         self._load_data()
@@ -141,6 +142,13 @@ class ChatHistoryEvaluator:
         # Create DataFrame and clean data
         self.chat_df = pd.DataFrame(processed_data)
         self.chat_df = self.chat_df.dropna(subset=["content", "timestamp"])
+
+        if self.deduplicate_corpus:
+            before = len(self.chat_df)
+            self.chat_df = self.chat_df.drop_duplicates(subset=["content", "timestamp"])
+            after = len(self.chat_df)
+            print(f"[info] Deduplicated corpus: removed {before - after} duplicate rows.")
+
         self.chat_df = self.chat_df.sort_values("timestamp").reset_index(drop=True)
 
         # Add time features
@@ -365,9 +373,13 @@ class ChatHistoryEvaluator:
         return "; ".join(parts) if parts else None
 
     def lexical_generate(
-        self, partial_text: str, context: dict[str, Any] | None = None, top_k: int = 3
-    ) -> str:
-        """Generate completion using lexical retrieval examples."""
+        self,
+        partial_text: str,
+        context: dict[str, Any] | None = None,
+        top_k: int = 3,
+        n_candidates: int = 1,
+    ) -> list[str]:
+        """Generate completion(s) using lexical retrieval examples."""
         ctx = context or {}
         examples = self.retrieve_lexical_examples(
             partial_text, top_k=top_k, corpus_df=ctx.get("corpus")
@@ -375,6 +387,7 @@ class ChatHistoryEvaluator:
         return self.generate_completion(
             partial_text,
             examples=examples,
+            n_candidates=n_candidates,
             context=self._format_context_text(
                 ctx.get("timestamp"), ctx.get("latitude"), ctx.get("longitude")
             ),
@@ -382,9 +395,13 @@ class ChatHistoryEvaluator:
         )
 
     def tfidf_generate(
-        self, partial_text: str, context: dict[str, Any] | None = None, top_k: int = 3
-    ) -> str:
-        """Generate completion using TF-IDF retrieved examples."""
+        self,
+        partial_text: str,
+        context: dict[str, Any] | None = None,
+        top_k: int = 3,
+        n_candidates: int = 1,
+    ) -> list[str]:
+        """Generate completion(s) using TF-IDF retrieved examples."""
         ctx = context or {}
         examples = self.retrieve_tfidf_examples(
             partial_text, top_k=top_k, corpus_df=ctx.get("corpus")
@@ -392,6 +409,7 @@ class ChatHistoryEvaluator:
         return self.generate_completion(
             partial_text,
             examples=examples,
+            n_candidates=n_candidates,
             context=self._format_context_text(
                 ctx.get("timestamp"), ctx.get("latitude"), ctx.get("longitude")
             ),
@@ -399,9 +417,13 @@ class ChatHistoryEvaluator:
         )
 
     def embedding_generate(
-        self, partial_text: str, context: dict[str, Any] | None = None, top_k: int = 3
-    ) -> str:
-        """Generate completion using embedding-based retrieval."""
+        self,
+        partial_text: str,
+        context: dict[str, Any] | None = None,
+        top_k: int = 3,
+        n_candidates: int = 1,
+    ) -> list[str]:
+        """Generate completion(s) using embedding-based retrieval."""
         ctx = context or {}
         examples = self.retrieve_embedding_examples(
             partial_text, top_k=top_k, corpus_df=ctx.get("corpus")
@@ -409,17 +431,24 @@ class ChatHistoryEvaluator:
         return self.generate_completion(
             partial_text,
             examples=examples,
+            n_candidates=n_candidates,
             context=self._format_context_text(
                 ctx.get("timestamp"), ctx.get("latitude"), ctx.get("longitude")
             ),
             conversation_context=ctx.get("conversation_context"),
         )
 
-    def context_only_generate(self, partial_text: str, context: dict[str, Any] | None = None) -> str:
-        """Generate completion using only contextual metadata (no retrieved examples)."""
+    def context_only_generate(
+        self,
+        partial_text: str,
+        context: dict[str, Any] | None = None,
+        n_candidates: int = 1,
+    ) -> list[str]:
+        """Generate completion(s) using only contextual metadata (no retrieved examples)."""
         ctx = context or {}
         return self.generate_completion(
             partial_text,
+            n_candidates=n_candidates,
             context=self._format_context_text(
                 ctx.get("timestamp"), ctx.get("latitude"), ctx.get("longitude")
             ),
@@ -440,9 +469,31 @@ class ChatHistoryEvaluator:
         return ChatHistoryEvaluator.calculate_character_accuracy(target, prediction)
 
     @staticmethod
+    def character_accuracy_ci(prediction: str, target: str) -> float:
+        """Case-insensitive character accuracy wrapper."""
+        return ChatHistoryEvaluator.calculate_character_accuracy_case_insensitive(
+            target, prediction
+        )
+
+    @staticmethod
     def word_accuracy(prediction: str, target: str) -> float:
-        """Wrapper for word-level accuracy metric used by Phase 1."""
+        """Wrapper for word-level recall (legacy word accuracy)."""
         return ChatHistoryEvaluator.calculate_word_accuracy(target, prediction)
+
+    @staticmethod
+    def word_precision(prediction: str, target: str) -> float:
+        """Wrapper for word-level precision."""
+        return ChatHistoryEvaluator.calculate_word_precision(target, prediction)
+
+    @staticmethod
+    def word_recall(prediction: str, target: str) -> float:
+        """Wrapper for word-level recall."""
+        return ChatHistoryEvaluator.calculate_word_recall(target, prediction)
+
+    @staticmethod
+    def word_f1(prediction: str, target: str) -> float:
+        """Wrapper for word-level F1."""
+        return ChatHistoryEvaluator.calculate_word_f1(target, prediction)
 
     def run_evaluation(
         self,
@@ -454,6 +505,8 @@ class ChatHistoryEvaluator:
         time_window_hours: float = 3.0,
         geo_radius_km: float = 10.0,
         conversation_window: int = 0,
+        skip_short_prefixes: bool = False,
+        n_candidates: int = 1,
     ) -> pd.DataFrame:
         """
         Run evaluation across test utterances using provided methods and metrics.
@@ -467,6 +520,8 @@ class ChatHistoryEvaluator:
             time_window_hours: Window for temporal filtering
             geo_radius_km: Radius for geographic filtering
             conversation_window: Number of previous utterances to include as context
+            skip_short_prefixes: If True, skip prefix_* methods when they cannot truncate
+            n_candidates: Number of completions to generate per method
 
         Returns:
             DataFrame of evaluation results.
@@ -514,34 +569,94 @@ class ChatHistoryEvaluator:
                     partial_text = target
                     print(f"[warn] Partial method '{partial_name}' failed: {exc}")
 
+                # Optionally skip prefix_* methods when the utterance is too short to truncate
+                if (
+                    skip_short_prefixes
+                    and partial_name.startswith("prefix")
+                    and partial_text == target
+                ):
+                    continue
+
                 for generation_name, generation_fn in generation_methods.items():
                     try:
-                        proposal = generation_fn(partial_text, context)
+                        proposals = generation_fn(partial_text, context, n_candidates)
+                        if isinstance(proposals, str):
+                            proposals_list = [proposals]
+                        else:
+                            proposals_list = list(proposals)
                     except Exception as exc:  # pragma: no cover - defensive
-                        proposal = f"Error: {exc}"
+                        proposals_list = [f"Error: {exc}"]
 
-                    metric_values: dict[str, Any] = {}
-                    for metric_name, metric_fn in evaluation_metrics.items():
-                        try:
-                            metric_values[metric_name] = metric_fn(proposal, target)
-                        except Exception as exc:  # pragma: no cover - defensive
-                            metric_values[metric_name] = None
-                            print(f"[warn] Metric '{metric_name}' failed: {exc}")
+                    # Candidate-level rows
+                    candidate_metric_values: list[dict[str, Any]] = []
+                    for candidate_idx, proposal in enumerate(proposals_list):
+                        metric_values: dict[str, Any] = {}
+                        for metric_name, metric_fn in evaluation_metrics.items():
+                            try:
+                                # Try metric functions that optionally accept the partial text
+                                try:
+                                    metric_values[metric_name] = metric_fn(
+                                        proposal, target, partial_text
+                                    )
+                                except TypeError:
+                                    metric_values[metric_name] = metric_fn(proposal, target)
+                            except Exception as exc:  # pragma: no cover - defensive
+                                metric_values[metric_name] = None
+                                print(f"[warn] Metric '{metric_name}' failed: {exc}")
+                        candidate_metric_values.append(metric_values)
 
-                    results.append(
-                        {
-                            "target": target,
-                            "partial": partial_text,
-                            "proposal": proposal,
-                            "partial_method": partial_name,
-                            "generation_method": generation_name,
-                            "timestamp": timestamp,
-                            "latitude": latitude,
-                            "longitude": longitude,
-                            "context_filter": context_filter,
-                            **metric_values,
-                        }
-                    )
+                        results.append(
+                            {
+                                "row_kind": "candidate",
+                                "aggregate_type": None,
+                                "candidate_idx": candidate_idx,
+                                "target": target,
+                                "partial": partial_text,
+                                "proposal": proposal,
+                                "partial_method": partial_name,
+                                "generation_method": generation_name,
+                                "timestamp": timestamp,
+                                "latitude": latitude,
+                                "longitude": longitude,
+                                "context_filter": context_filter,
+                                **metric_values,
+                            }
+                        )
+
+                    # Aggregate rows (best/mean across candidates) if we have any
+                    if candidate_metric_values:
+                        for agg_type in ("best", "mean"):
+                            aggregated_metrics: dict[str, Any] = {}
+                            for metric_name in evaluation_metrics.keys():
+                                values = [
+                                    mv.get(metric_name)
+                                    for mv in candidate_metric_values
+                                    if mv.get(metric_name) is not None
+                                ]
+                                if not values:
+                                    aggregated_metrics[metric_name] = None
+                                elif agg_type == "best":
+                                    aggregated_metrics[metric_name] = max(values)
+                                else:
+                                    aggregated_metrics[metric_name] = float(np.mean(values))
+
+                            results.append(
+                                {
+                                    "row_kind": "aggregate",
+                                    "aggregate_type": agg_type,
+                                    "candidate_idx": None,
+                                    "target": target,
+                                    "partial": partial_text,
+                                    "proposal": f"{agg_type}_of_{len(proposals_list)}",
+                                    "partial_method": partial_name,
+                                    "generation_method": generation_name,
+                                    "timestamp": timestamp,
+                                    "latitude": latitude,
+                                    "longitude": longitude,
+                                    "context_filter": context_filter,
+                                    **aggregated_metrics,
+                                }
+                            )
 
         return pd.DataFrame(results)
 
@@ -552,8 +667,9 @@ class ChatHistoryEvaluator:
         examples: list[dict] | None = None,
         context: str | None = None,
         conversation_context: str | None = None,
-    ) -> str:
-        """Generate a completion for a partial utterance using an LLM."""
+        n_candidates: int = 1,
+    ) -> list[str]:
+        """Generate completion(s) for a partial utterance using an LLM."""
         system_prompt = "You are an intelligent AAC text completion system. Complete the user's partial text based on provided context and examples."
 
         user_prompt = f"Complete the following partial text: '{partial_text}'\n\n"
@@ -574,16 +690,20 @@ class ChatHistoryEvaluator:
 
         user_prompt += "Provide a completion that matches the user's likely intent. Only return the completed text, no explanation."
 
-        try:
-            response = self.llm_client.generate(
-                user_prompt,
-                system_prompt=system_prompt,
-                temperature=0.2
-            )
-            return response.strip()
-        except Exception as e:
-            print(f"Error generating completion: {e}")
-            return partial_text  # Fallback to returning partial text
+        candidates: list[str] = []
+        attempts = max(1, n_candidates)
+
+        for _ in range(attempts):
+            try:
+                response = self.llm_client.generate(
+                    user_prompt, system_prompt=system_prompt, temperature=0.2
+                )
+                candidates.append(response.strip())
+            except Exception as e:
+                print(f"Error generating completion: {e}")
+                candidates.append(partial_text)  # Fallback to returning partial text
+
+        return candidates
 
     def calculate_embedding_similarity(self, text1: str, text2: str) -> float:
         """Calculate semantic similarity between two texts using sentence embeddings."""
@@ -610,11 +730,12 @@ class ChatHistoryEvaluator:
             score_text = self.llm_client.generate(
                 user_prompt,
                 system_prompt="You are an expert evaluator of AAC text completions.",
-                temperature=0.0
+                temperature=0.0,
             )
             # Extract integer score from the response
             import re
-            match = re.search(r'\b(\d{1,2})\b', score_text)
+
+            match = re.search(r"\b(\d{1,2})\b", score_text)
             if match:
                 score = int(match.group(1))
                 return min(10, max(1, score))
@@ -636,6 +757,14 @@ class ChatHistoryEvaluator:
         return similarity
 
     @staticmethod
+    def calculate_character_accuracy_case_insensitive(target: str, proposal: str) -> float:
+        """Case-insensitive character-level accuracy between target and proposal."""
+        if not target or not proposal:
+            return 0.0
+
+        return ChatHistoryEvaluator.calculate_character_accuracy(target.lower(), proposal.lower())
+
+    @staticmethod
     def calculate_word_accuracy(target: str, proposal: str) -> float:
         """Calculate word-level accuracy between target and proposal."""
         if not target or not proposal:
@@ -649,3 +778,88 @@ class ChatHistoryEvaluator:
 
         intersection = target_words.intersection(proposal_words)
         return len(intersection) / len(target_words)
+
+    @staticmethod
+    def calculate_word_precision(target: str, proposal: str) -> float:
+        """Calculate word-level precision between target and proposal."""
+        if not target or not proposal:
+            return 0.0
+
+        target_words = set(target.lower().split())
+        proposal_words = set(proposal.lower().split())
+
+        if not proposal_words:
+            return 0.0
+
+        intersection = target_words.intersection(proposal_words)
+        return len(intersection) / len(proposal_words)
+
+    @staticmethod
+    def calculate_word_recall(target: str, proposal: str) -> float:
+        """Calculate word-level recall between target and proposal."""
+        if not target or not proposal:
+            return 0.0
+
+        target_words = set(target.lower().split())
+        proposal_words = set(proposal.lower().split())
+
+        if not target_words:
+            return 0.0
+
+        intersection = target_words.intersection(proposal_words)
+        return len(intersection) / len(target_words)
+
+    @staticmethod
+    def calculate_word_f1(target: str, proposal: str) -> float:
+        """Calculate word-level F1 combining precision and recall."""
+        precision = ChatHistoryEvaluator.calculate_word_precision(target, proposal)
+        recall = ChatHistoryEvaluator.calculate_word_recall(target, proposal)
+
+        if precision + recall == 0:
+            return 0.0
+
+        return 2 * (precision * recall) / (precision + recall)
+
+    @staticmethod
+    def calculate_remaining_fraction(target: str, partial: str) -> float:
+        """Fraction of the target that remains after the partial."""
+        target_words = target.lower().split()
+        partial_words = partial.lower().split()
+
+        if not target_words:
+            return 0.0
+
+        remaining = max(len(target_words) - len(partial_words), 0)
+        return remaining / len(target_words)
+
+    @staticmethod
+    def calculate_weighted_word_f1(target: str, proposal: str, partial: str | None = None) -> float:
+        """
+        Word-level F1 scaled by how much of the target remained after the partial.
+        Falls back to plain F1 when partial is not provided.
+        """
+        base_f1 = ChatHistoryEvaluator.calculate_word_f1(target, proposal)
+        if partial is None:
+            return base_f1
+        remaining_fraction = ChatHistoryEvaluator.calculate_remaining_fraction(target, partial)
+        return base_f1 * remaining_fraction
+
+    @staticmethod
+    def calculate_completion_gain(target: str, proposal: str, partial: str | None = None) -> float:
+        """
+        Fraction of remaining target words correctly added beyond the partial.
+        """
+        target_words = set(target.lower().split())
+        proposal_words = set(proposal.lower().split())
+        partial_words = set(partial.lower().split()) if partial else set()
+
+        if not target_words:
+            return 0.0
+
+        known_target_words = target_words.intersection(partial_words)
+        remaining_target = max(len(target_words) - len(known_target_words), 1)
+
+        hits = target_words.intersection(proposal_words)
+        new_hits = hits - known_target_words
+
+        return len(new_hits) / remaining_target

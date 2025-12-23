@@ -45,9 +45,7 @@ KEYWORDS: {keywords_str}
 
 Based only on these keywords, give ONE concise, actionable utterance that states exactly what Dwayne wants done. Include the specific action/object implied by the keywords. Do not add pleasantries or labels. Output only the utterance."""
 
-    def _create_contextual_prompt(
-        self, keywords: list[str], context: dict[str, Any]
-    ) -> str:
+    def _create_contextual_prompt(self, keywords: list[str], context: dict[str, Any]) -> str:
         """Create prompt with contextual information."""
         keywords_str = ", ".join(keywords)
 
@@ -73,9 +71,7 @@ Based only on these keywords, give ONE concise, actionable utterance that states
             context_parts.append(f"HEALTH STATUS: {context['medical_context']}")
 
         context_str = (
-            "\n".join(context_parts)
-            if context_parts
-            else "No additional context available"
+            "\n".join(context_parts) if context_parts else "No additional context available"
         )
 
         return f"""You are an AAC assistant communicating for Dwayne, an MND patient.
@@ -97,9 +93,7 @@ Write ONE concise, actionable utterance that states exactly what Dwayne wants do
                 self.logger.error(f"Error evaluating prediction: {e}")
             return 5  # Default middle score
 
-    def run_baseline_test(
-        self, keywords_df, sample_size: int | None = None
-    ) -> dict[str, Any]:
+    def run_baseline_test(self, keywords_df, sample_size: int | None = None) -> dict[str, Any]:
         """Run Part 1: Baseline testing with keywords only."""
         if sample_size:
             keywords_df = keywords_df.head(sample_size)
@@ -135,9 +129,7 @@ Write ONE concise, actionable utterance that states exactly what Dwayne wants do
             results["keyword_combinations"].append(keywords)
 
             if self.logger:
-                self.logger.debug(
-                    f"Baseline test: {keywords} -> Score: {score}/10"
-                )
+                self.logger.debug(f"Baseline test: {keywords} -> Score: {score}/10")
 
         return results
 
@@ -203,26 +195,21 @@ Write ONE concise, actionable utterance that states exactly what Dwayne wants do
             results["context_levels"][level] = level_results
 
         # Calculate improvements compared to baseline
-        if "baseline_scores" in results.get("context_levels", {}).get(
-            "location_only", {}
-        ).get("scores", []):
+        if "baseline_scores" in results.get("context_levels", {}).get("location_only", {}).get(
+            "scores", []
+        ):
             baseline_scores = results["context_levels"]["location_only"]["scores"]
             for level in context_levels[1:]:  # Skip baseline
                 if level in results["context_levels"]:
                     level_scores = results["context_levels"][level]["scores"]
                     if len(level_scores) == len(baseline_scores):
                         improvements = [
-                            level_scores[i] - baseline_scores[i]
-                            for i in range(len(level_scores))
+                            level_scores[i] - baseline_scores[i] for i in range(len(level_scores))
                         ]
                         results["improvements_by_level"][level] = {
                             "mean_improvement": sum(improvements) / len(improvements),
-                            "positive_improvements": sum(
-                                1 for imp in improvements if imp > 0
-                            ),
-                            "improvement_rate": sum(
-                                1 for imp in improvements if imp > 0
-                            )
+                            "positive_improvements": sum(1 for imp in improvements if imp > 0),
+                            "improvement_rate": sum(1 for imp in improvements if imp > 0)
                             / len(improvements),
                         }
 
@@ -298,8 +285,7 @@ Write ONE concise, actionable utterance that states exactly what Dwayne wants do
                 results["keyword_results"][keyword] = keyword_results
                 results["effectiveness_by_keyword"][keyword] = {
                     "total_tests": len(keyword_results["scores"]),
-                    "mean_score": sum(keyword_results["scores"])
-                    / len(keyword_results["scores"]),
+                    "mean_score": sum(keyword_results["scores"]) / len(keyword_results["scores"]),
                     "max_score": max(keyword_results["scores"]),
                     "success_rate": sum(1 for s in keyword_results["scores"] if s >= 7)
                     / len(keyword_results["scores"])
