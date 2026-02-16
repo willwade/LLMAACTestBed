@@ -12,6 +12,7 @@ from __future__ import annotations
 import argparse
 import asyncio
 import json
+import os
 import random
 import re
 import time
@@ -278,8 +279,28 @@ def approx_tokens(prompt: str, response: str) -> int:
 async def cognee_clear_memory() -> None:
     if not HAS_COGNEE:
         return
+    # Keep system metadata intact; full system prune can remove storage roots on Windows.
     await cognee.prune.prune_data()
-    await cognee.prune.prune_system(metadata=True)
+
+
+def configure_cognee_storage(base_dir: Path) -> None:
+    if not HAS_COGNEE:
+        return
+    data_dir = base_dir / "data"
+    system_dir = base_dir / "system"
+    data_dir.mkdir(parents=True, exist_ok=True)
+    system_dir.mkdir(parents=True, exist_ok=True)
+
+    # Best-effort configuration across Cognee versions.
+    if hasattr(cognee, "config"):
+        config_obj = cognee.config
+        if hasattr(config_obj, "data_root_directory"):
+            config_obj.data_root_directory(str(data_dir))
+        if hasattr(config_obj, "system_root_directory"):
+            config_obj.system_root_directory(str(system_dir))
+
+    os.environ["COGNEE_DATA_ROOT_DIRECTORY"] = str(data_dir)
+    os.environ["COGNEE_SYSTEM_ROOT_DIRECTORY"] = str(system_dir)
 
 
 def extract_cognee_snippets(results: list[Any], max_snippets: int = 3) -> list[str]:
@@ -426,6 +447,9 @@ async def run_experiment(args: argparse.Namespace) -> dict[str, Any]:
     global_memory_pool = [format_turn_memory(t) for t in turns]
     rng = random.Random(args.random_seed)
 
+    if args.use_cognee and HAS_COGNEE:
+        configure_cognee_storage(Path(args.cognee_storage_dir))
+
     results: list[dict[str, Any]] = []
 
     for session_idx, session in enumerate(sessions, start=1):
@@ -437,7 +461,11 @@ async def run_experiment(args: argparse.Namespace) -> dict[str, Any]:
 
         if args.use_cognee and HAS_COGNEE:
             await cognee_clear_memory()
-            await cognee.add(static_memory)
+            try:
+                await cognee.add(static_memory)
+            except FileNotFoundError:
+                configure_cognee_storage(Path(args.cognee_storage_dir))
+                await cognee.add(static_memory)
             await cognee.cognify()
             if args.cognee_memify:
                 await cognee.memify()
@@ -808,6 +836,12 @@ def main() -> None:
     parser.add_argument("--use-cognee", action="store_true")
     parser.add_argument("--cognee-memify", action="store_true")
     parser.add_argument("--cognee-update-each-turn", action="store_true")
+    parser.add_argument(
+        "--cognee-storage-dir",
+        type=str,
+        default="results/cognee_storage",
+        help="Local writable storage root for Cognee data/system files",
+    )
     parser.add_argument("--random-seed", type=int, default=1337)
     parser.add_argument(
         "--env-file",
