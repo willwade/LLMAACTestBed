@@ -1,0 +1,796 @@
+[
+  {
+    "id": 101,
+    "target": "Remote. Here.",
+    "last_utterance": "The TV? God, sorry. (Kelsey lowers volume)",
+    "interlocutor": "Kelsey",
+    "time": "16:00",
+    "location": "Living Room",
+    "active_participants": [
+      "Kelsey"
+    ],
+    "raw": {
+      "id": 101,
+      "target_ground_truth": "Remote. Here.",
+      "metadata": {
+        "time": "16:00",
+        "location": "Living Room",
+        "active_participants": [
+          "Kelsey"
+        ]
+      },
+      "dialogue_history": {
+        "previous_speaker": "Kelsey",
+        "last_utterance": "The TV? God, sorry. (Kelsey lowers volume)"
+      }
+    }
+  },
+  {
+    "id": 102,
+    "target": "Neck. Heavy.",
+    "last_utterance": "What is it? Pain?",
+    "interlocutor": "Kelsey",
+    "time": "16:05",
+    "location": "Living Room",
+    "active_participants": [
+      "Kelsey"
+    ],
+    "raw": {
+      "id": 102,
+      "target_ground_truth": "Neck. Heavy.",
+      "metadata": {
+        "time": "16:05",
+        "location": "Living Room",
+        "active_participants": [
+          "Kelsey"
+        ]
+      },
+      "dialogue_history": {
+        "previous_speaker": "Kelsey",
+        "last_utterance": "What is it? Pain?"
+      }
+    }
+  },
+  {
+    "id": 103,
+    "target": "Fan. On. Now.",
+    "last_utterance": "Dave, you'll freeze.",
+    "interlocutor": "Kelsey",
+    "time": "16:15",
+    "location": "Living Room",
+    "active_participants": [
+      "Kelsey"
+    ],
+    "raw": {
+      "id": 103,
+      "target_ground_truth": "Fan. On. Now.",
+      "metadata": {
+        "time": "16:15",
+        "location": "Living Room",
+        "active_participants": [
+          "Kelsey"
+        ]
+      },
+      "dialogue_history": {
+        "previous_speaker": "Kelsey",
+        "last_utterance": "Dave, you'll freeze."
+      }
+    }
+  },
+  {
+    "id": 104,
+    "target": "Mask.",
+    "last_utterance": "For the night? Or just for a nap? Need air?",
+    "interlocutor": "Kelsey",
+    "time": "16:30",
+    "location": "Living Room",
+    "active_participants": [
+      "Kelsey"
+    ],
+    "raw": {
+      "id": 104,
+      "target_ground_truth": "Mask.",
+      "metadata": {
+        "time": "16:30",
+        "location": "Living Room",
+        "active_participants": [
+          "Kelsey"
+        ]
+      },
+      "dialogue_history": {
+        "previous_speaker": "Kelsey",
+        "last_utterance": "For the night? Or just for a nap? Need air?"
+      }
+    }
+  },
+  {
+    "id": 105,
+    "target": "No visit. Too... tired.",
+    "last_utterance": "I wish I could do something. Does he want me to come over? I can get the bus.",
+    "interlocutor": "Dawn",
+    "time": "10:15",
+    "location": "Living Room",
+    "active_participants": [
+      "Kelsey",
+      "Nurse Sarah",
+      "Dawn (iPad)"
+    ],
+    "raw": {
+      "id": 105,
+      "target_ground_truth": "No visit. Too... tired.",
+      "metadata": {
+        "time": "10:15",
+        "location": "Living Room",
+        "active_participants": [
+          "Kelsey",
+          "Nurse Sarah",
+          "Dawn (iPad)"
+        ]
+      },
+      "dialogue_history": {
+        "previous_speaker": "Dawn",
+        "last_utterance": "I wish I could do something. Does he want me to come over? I can get the bus."
+      }
+    }
+  },
+  {
+    "id": 1001,
+    "target": "NIV Mask (Non-Invasive Ventilation)",
+    "last_utterance": "Want the NIV Mask (Non-Invasive Ventilation) adjusted?",
+    "interlocutor": "Dawn",
+    "time": "08:00",
+    "location": "Clinic",
+    "active_participants": [
+      "Dawn"
+    ]
+  },
+  {
+    "id": 1002,
+    "target": "Mask on",
+    "last_utterance": "Do you want me to turn that on?",
+    "interlocutor": "Dawn",
+    "time": "08:07",
+    "location": "Clinic",
+    "active_participants": [
+      "Dawn"
+    ]
+  },
+  {
+    "id": 1003,
+    "target": "Mask on",
+    "last_utterance": "Do you want me to turn that on?",
+    "interlocutor": "Dawn",
+    "time": "08:14",
+    "location": "Clinic",
+    "active_participants": [
+      "Dawn"
+    ]
+  },
+  {
+    "id": 1004,
+    "target": "Desk fan",
+    "last_utterance": "Want the Desk fan adjusted?",
+    "interlocutor": "Dawn",
+    "time": "08:21",
+    "location": "Clinic",
+    "active_participants": [
+      "Dawn"
+    ]
+  },
+  {
+    "id": 1005,
+    "target": "Fan on",
+    "last_utterance": "Do you want me to turn that on?",
+    "interlocutor": "Dawn",
+    "time": "08:28",
+    "location": "Clinic",
+    "active_participants": [
+      "Dawn"
+    ]
+  },
+  {
+    "id": 1006,
+    "target": "Mask on",
+    "last_utterance": "Do you want me to turn that on?",
+    "interlocutor": "Dawn",
+    "time": "08:35",
+    "location": "Clinic",
+    "active_participants": [
+      "Dawn"
+    ]
+  },
+  {
+    "id": 1007,
+    "target": "Neck brace adjust",
+    "last_utterance": "Do you want the Neck brace adjust?",
+    "interlocutor": "Dawn",
+    "time": "08:42",
+    "location": "Clinic",
+    "active_participants": [
+      "Dawn"
+    ]
+  },
+  {
+    "id": 1008,
+    "target": "Neck brace adjust",
+    "last_utterance": "Should I do the usual?",
+    "interlocutor": "Dawn",
+    "time": "08:49",
+    "location": "Clinic",
+    "active_participants": [
+      "Dawn"
+    ]
+  },
+  {
+    "id": 1009,
+    "target": "Water/Straw",
+    "last_utterance": "Is this what you mean?",
+    "interlocutor": "Dawn",
+    "time": "08:56",
+    "location": "Clinic",
+    "active_participants": [
+      "Dawn"
+    ]
+  },
+  {
+    "id": 1010,
+    "target": "Water/Straw",
+    "last_utterance": "Same as before?",
+    "interlocutor": "Dawn",
+    "time": "09:03",
+    "location": "Clinic",
+    "active_participants": [
+      "Dawn"
+    ]
+  },
+  {
+    "id": 1011,
+    "target": "Mask on",
+    "last_utterance": "Do you want me to turn that on?",
+    "interlocutor": "Dawn",
+    "time": "09:10",
+    "location": "Clinic",
+    "active_participants": [
+      "Dawn"
+    ]
+  },
+  {
+    "id": 1012,
+    "target": "Mask on",
+    "last_utterance": "Do you want the Mask on?",
+    "interlocutor": "Dawn",
+    "time": "09:17",
+    "location": "Clinic",
+    "active_participants": [
+      "Dawn"
+    ]
+  },
+  {
+    "id": 1013,
+    "target": "Mask on",
+    "last_utterance": "Same as before?",
+    "interlocutor": "Dawn",
+    "time": "09:24",
+    "location": "Clinic",
+    "active_participants": [
+      "Dawn"
+    ]
+  },
+  {
+    "id": 1014,
+    "target": "Syringe driver (arm)",
+    "last_utterance": "Want the Syringe driver (arm) adjusted?",
+    "interlocutor": "Dawn",
+    "time": "09:31",
+    "location": "Clinic",
+    "active_participants": [
+      "Dawn"
+    ]
+  },
+  {
+    "id": 1015,
+    "target": "Syringe driver (arm)",
+    "last_utterance": "Should I do the usual?",
+    "interlocutor": "Dawn",
+    "time": "09:38",
+    "location": "Clinic",
+    "active_participants": [
+      "Dawn"
+    ]
+  },
+  {
+    "id": 1016,
+    "target": "Help",
+    "last_utterance": "Are you still feeling Weak neck muscles (head drop)?",
+    "interlocutor": "Dawn",
+    "time": "10:00",
+    "location": "Clinic",
+    "active_participants": [
+      "Dawn"
+    ]
+  },
+  {
+    "id": 1017,
+    "target": "Mask on",
+    "last_utterance": "Need anything right now?",
+    "interlocutor": "Dawn",
+    "time": "10:07",
+    "location": "Clinic",
+    "active_participants": [
+      "Dawn"
+    ]
+  },
+  {
+    "id": 1018,
+    "target": "Mask on",
+    "last_utterance": "Is this what you mean?",
+    "interlocutor": "Dawn",
+    "time": "10:14",
+    "location": "Clinic",
+    "active_participants": [
+      "Dawn"
+    ]
+  },
+  {
+    "id": 1019,
+    "target": "Water/Straw",
+    "last_utterance": "Is this what you mean?",
+    "interlocutor": "Dawn",
+    "time": "10:21",
+    "location": "Clinic",
+    "active_participants": [
+      "Dawn"
+    ]
+  },
+  {
+    "id": 1020,
+    "target": "Help",
+    "last_utterance": "Are you still feeling Temperature dysregulation (rapidly hot/cold)?",
+    "interlocutor": "Dawn",
+    "time": "10:28",
+    "location": "Clinic",
+    "active_participants": [
+      "Dawn"
+    ]
+  },
+  {
+    "id": 1021,
+    "target": "Fan on",
+    "last_utterance": "Need anything right now?",
+    "interlocutor": "Dawn",
+    "time": "10:35",
+    "location": "Clinic",
+    "active_participants": [
+      "Dawn"
+    ]
+  },
+  {
+    "id": 1022,
+    "target": "Fan on",
+    "last_utterance": "Same as before?",
+    "interlocutor": "Dawn",
+    "time": "10:42",
+    "location": "Clinic",
+    "active_participants": [
+      "Dawn"
+    ]
+  },
+  {
+    "id": 1023,
+    "target": "Help",
+    "last_utterance": "Are you still feeling Weak neck muscles (head drop)?",
+    "interlocutor": "Dawn",
+    "time": "10:49",
+    "location": "Clinic",
+    "active_participants": [
+      "Dawn"
+    ]
+  },
+  {
+    "id": 1024,
+    "target": "Syringe driver (arm)",
+    "last_utterance": "Want the Syringe driver (arm) adjusted?",
+    "interlocutor": "Dawn",
+    "time": "10:56",
+    "location": "Clinic",
+    "active_participants": [
+      "Dawn"
+    ]
+  },
+  {
+    "id": 1025,
+    "target": "Help",
+    "last_utterance": "Are you still feeling Weak neck muscles (head drop)?",
+    "interlocutor": "Dawn",
+    "time": "11:03",
+    "location": "Clinic",
+    "active_participants": [
+      "Dawn"
+    ]
+  },
+  {
+    "id": 1026,
+    "target": "Neck brace adjust",
+    "last_utterance": "Is this what you mean?",
+    "interlocutor": "Dawn",
+    "time": "11:10",
+    "location": "Clinic",
+    "active_participants": [
+      "Dawn"
+    ]
+  },
+  {
+    "id": 1027,
+    "target": "Neck brace adjust",
+    "last_utterance": "Should I do the usual?",
+    "interlocutor": "Dawn",
+    "time": "11:17",
+    "location": "Clinic",
+    "active_participants": [
+      "Dawn"
+    ]
+  },
+  {
+    "id": 1028,
+    "target": "Neck brace adjust",
+    "last_utterance": "Should I do the usual?",
+    "interlocutor": "Dawn",
+    "time": "11:24",
+    "location": "Clinic",
+    "active_participants": [
+      "Dawn"
+    ]
+  },
+  {
+    "id": 1029,
+    "target": "Water/Straw",
+    "last_utterance": "Do you want me to turn that on?",
+    "interlocutor": "Dawn",
+    "time": "11:31",
+    "location": "Clinic",
+    "active_participants": [
+      "Dawn"
+    ]
+  },
+  {
+    "id": 1030,
+    "target": "Help",
+    "last_utterance": "Are you still feeling Weak neck muscles (head drop)?",
+    "interlocutor": "Dawn",
+    "time": "11:38",
+    "location": "Clinic",
+    "active_participants": [
+      "Dawn"
+    ]
+  },
+  {
+    "id": 1031,
+    "target": "Water/Straw",
+    "last_utterance": "Should I do the usual?",
+    "interlocutor": "Sarah",
+    "time": "12:00",
+    "location": "Bedroom",
+    "active_participants": [
+      "Sarah"
+    ]
+  },
+  {
+    "id": 1032,
+    "target": "Water/Straw",
+    "last_utterance": "Is this what you mean?",
+    "interlocutor": "Sarah",
+    "time": "12:07",
+    "location": "Bedroom",
+    "active_participants": [
+      "Sarah"
+    ]
+  },
+  {
+    "id": 1033,
+    "target": "Water/Straw",
+    "last_utterance": "Do you want the Water/Straw?",
+    "interlocutor": "Sarah",
+    "time": "12:14",
+    "location": "Bedroom",
+    "active_participants": [
+      "Sarah"
+    ]
+  },
+  {
+    "id": 1034,
+    "target": "Neck brace adjust",
+    "last_utterance": "Do you want me to turn that on?",
+    "interlocutor": "Sarah",
+    "time": "12:21",
+    "location": "Bedroom",
+    "active_participants": [
+      "Sarah"
+    ]
+  },
+  {
+    "id": 1035,
+    "target": "Syringe driver (arm)",
+    "last_utterance": "Want the Syringe driver (arm) adjusted?",
+    "interlocutor": "Sarah",
+    "time": "12:28",
+    "location": "Bedroom",
+    "active_participants": [
+      "Sarah"
+    ]
+  },
+  {
+    "id": 1036,
+    "target": "Mask on",
+    "last_utterance": "Do you want me to turn that on?",
+    "interlocutor": "Sarah",
+    "time": "12:35",
+    "location": "Bedroom",
+    "active_participants": [
+      "Sarah"
+    ]
+  },
+  {
+    "id": 1037,
+    "target": "Help",
+    "last_utterance": "Are you still feeling Weak neck muscles (head drop)?",
+    "interlocutor": "Sarah",
+    "time": "12:42",
+    "location": "Bedroom",
+    "active_participants": [
+      "Sarah"
+    ]
+  },
+  {
+    "id": 1038,
+    "target": "Help",
+    "last_utterance": "Same as before?",
+    "interlocutor": "Sarah",
+    "time": "12:49",
+    "location": "Bedroom",
+    "active_participants": [
+      "Sarah"
+    ]
+  },
+  {
+    "id": 1039,
+    "target": "Help",
+    "last_utterance": "Same as before?",
+    "interlocutor": "Sarah",
+    "time": "12:56",
+    "location": "Bedroom",
+    "active_participants": [
+      "Sarah"
+    ]
+  },
+  {
+    "id": 1040,
+    "target": "Window open",
+    "last_utterance": "Do you want me to turn that on?",
+    "interlocutor": "Sarah",
+    "time": "13:03",
+    "location": "Bedroom",
+    "active_participants": [
+      "Sarah"
+    ]
+  },
+  {
+    "id": 1041,
+    "target": "Window open",
+    "last_utterance": "Do you want me to turn that on?",
+    "interlocutor": "Sarah",
+    "time": "13:10",
+    "location": "Bedroom",
+    "active_participants": [
+      "Sarah"
+    ]
+  },
+  {
+    "id": 1042,
+    "target": "Window open",
+    "last_utterance": "Should I do the usual?",
+    "interlocutor": "Sarah",
+    "time": "13:17",
+    "location": "Bedroom",
+    "active_participants": [
+      "Sarah"
+    ]
+  },
+  {
+    "id": 1043,
+    "target": "Window open",
+    "last_utterance": "Should I do the usual?",
+    "interlocutor": "Sarah",
+    "time": "13:24",
+    "location": "Bedroom",
+    "active_participants": [
+      "Sarah"
+    ]
+  },
+  {
+    "id": 1044,
+    "target": "Window open",
+    "last_utterance": "Same as before?",
+    "interlocutor": "Sarah",
+    "time": "13:31",
+    "location": "Bedroom",
+    "active_participants": [
+      "Sarah"
+    ]
+  },
+  {
+    "id": 1045,
+    "target": "Mask on",
+    "last_utterance": "Do you want the Mask on?",
+    "interlocutor": "Sarah",
+    "time": "13:38",
+    "location": "Bedroom",
+    "active_participants": [
+      "Sarah"
+    ]
+  },
+  {
+    "id": 1046,
+    "target": "TV volume down",
+    "last_utterance": "Need anything right now?",
+    "interlocutor": "Kelsey",
+    "time": "14:00",
+    "location": "Living Room",
+    "active_participants": [
+      "Kelsey"
+    ]
+  },
+  {
+    "id": 1047,
+    "target": "TV volume down",
+    "last_utterance": "Is this what you mean?",
+    "interlocutor": "Kelsey",
+    "time": "14:07",
+    "location": "Living Room",
+    "active_participants": [
+      "Kelsey"
+    ]
+  },
+  {
+    "id": 1048,
+    "target": "TV volume down",
+    "last_utterance": "Should I do the usual?",
+    "interlocutor": "Kelsey",
+    "time": "14:14",
+    "location": "Living Room",
+    "active_participants": [
+      "Kelsey"
+    ]
+  },
+  {
+    "id": 1049,
+    "target": "Mask on",
+    "last_utterance": "Do you want the Mask on?",
+    "interlocutor": "Kelsey",
+    "time": "14:21",
+    "location": "Living Room",
+    "active_participants": [
+      "Kelsey"
+    ]
+  },
+  {
+    "id": 1050,
+    "target": "Mask on",
+    "last_utterance": "Do you want me to turn that on?",
+    "interlocutor": "Kelsey",
+    "time": "14:28",
+    "location": "Living Room",
+    "active_participants": [
+      "Kelsey"
+    ]
+  },
+  {
+    "id": 1051,
+    "target": "Mask on",
+    "last_utterance": "Do you want the Mask on?",
+    "interlocutor": "Kelsey",
+    "time": "14:35",
+    "location": "Living Room",
+    "active_participants": [
+      "Kelsey"
+    ]
+  },
+  {
+    "id": 1052,
+    "target": "Mask on",
+    "last_utterance": "Same as before?",
+    "interlocutor": "Kelsey",
+    "time": "14:42",
+    "location": "Living Room",
+    "active_participants": [
+      "Kelsey"
+    ]
+  },
+  {
+    "id": 1053,
+    "target": "Neck brace adjust",
+    "last_utterance": "Do you want the Neck brace adjust?",
+    "interlocutor": "Kelsey",
+    "time": "14:49",
+    "location": "Living Room",
+    "active_participants": [
+      "Kelsey"
+    ]
+  },
+  {
+    "id": 1054,
+    "target": "Neck brace adjust",
+    "last_utterance": "Should I do the usual?",
+    "interlocutor": "Kelsey",
+    "time": "14:56",
+    "location": "Living Room",
+    "active_participants": [
+      "Kelsey"
+    ]
+  },
+  {
+    "id": 1055,
+    "target": "Water/Straw",
+    "last_utterance": "Do you want me to turn that on?",
+    "interlocutor": "Kelsey",
+    "time": "15:03",
+    "location": "Living Room",
+    "active_participants": [
+      "Kelsey"
+    ]
+  },
+  {
+    "id": 1056,
+    "target": "Window open",
+    "last_utterance": "Do you want me to turn that on?",
+    "interlocutor": "Kelsey",
+    "time": "15:10",
+    "location": "Living Room",
+    "active_participants": [
+      "Kelsey"
+    ]
+  },
+  {
+    "id": 1057,
+    "target": "TV volume down",
+    "last_utterance": "Is this what you mean?",
+    "interlocutor": "Kelsey",
+    "time": "15:17",
+    "location": "Living Room",
+    "active_participants": [
+      "Kelsey"
+    ]
+  },
+  {
+    "id": 1058,
+    "target": "TV volume down",
+    "last_utterance": "Same as before?",
+    "interlocutor": "Kelsey",
+    "time": "15:24",
+    "location": "Living Room",
+    "active_participants": [
+      "Kelsey"
+    ]
+  },
+  {
+    "id": 1059,
+    "target": "Help",
+    "last_utterance": "Are you still feeling Shortness of breath?",
+    "interlocutor": "Kelsey",
+    "time": "15:31",
+    "location": "Living Room",
+    "active_participants": [
+      "Kelsey"
+    ]
+  },
+  {
+    "id": 1060,
+    "target": "Mask on",
+    "last_utterance": "Do you want the Mask on?",
+    "interlocutor": "Kelsey",
+    "time": "15:38",
+    "location": "Living Room",
+    "active_participants": [
+      "Kelsey"
+    ]
+  }
+]

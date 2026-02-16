@@ -1,0 +1,136 @@
+[
+  {
+    "id": 101,
+    "target": "Remote. Here.",
+    "last_utterance": "The TV? God, sorry. (Kelsey lowers volume)",
+    "interlocutor": "Kelsey",
+    "time": "16:00",
+    "location": "Living Room",
+    "active_participants": [
+      "Kelsey"
+    ],
+    "raw": {
+      "id": 101,
+      "target_ground_truth": "Remote. Here.",
+      "metadata": {
+        "time": "16:00",
+        "location": "Living Room",
+        "active_participants": [
+          "Kelsey"
+        ]
+      },
+      "dialogue_history": {
+        "previous_speaker": "Kelsey",
+        "last_utterance": "The TV? God, sorry. (Kelsey lowers volume)"
+      }
+    }
+  },
+  {
+    "id": 102,
+    "target": "Neck. Heavy.",
+    "last_utterance": "What is it? Pain?",
+    "interlocutor": "Kelsey",
+    "time": "16:05",
+    "location": "Living Room",
+    "active_participants": [
+      "Kelsey"
+    ],
+    "raw": {
+      "id": 102,
+      "target_ground_truth": "Neck. Heavy.",
+      "metadata": {
+        "time": "16:05",
+        "location": "Living Room",
+        "active_participants": [
+          "Kelsey"
+        ]
+      },
+      "dialogue_history": {
+        "previous_speaker": "Kelsey",
+        "last_utterance": "What is it? Pain?"
+      }
+    }
+  },
+  {
+    "id": 103,
+    "target": "Fan. On. Now.",
+    "last_utterance": "Dave, you'll freeze.",
+    "interlocutor": "Kelsey",
+    "time": "16:15",
+    "location": "Living Room",
+    "active_participants": [
+      "Kelsey"
+    ],
+    "raw": {
+      "id": 103,
+      "target_ground_truth": "Fan. On. Now.",
+      "metadata": {
+        "time": "16:15",
+        "location": "Living Room",
+        "active_participants": [
+          "Kelsey"
+        ]
+      },
+      "dialogue_history": {
+        "previous_speaker": "Kelsey",
+        "last_utterance": "Dave, you'll freeze."
+      }
+    }
+  },
+  {
+    "id": 104,
+    "target": "Mask.",
+    "last_utterance": "For the night? Or just for a nap? Need air?",
+    "interlocutor": "Kelsey",
+    "time": "16:30",
+    "location": "Living Room",
+    "active_participants": [
+      "Kelsey"
+    ],
+    "raw": {
+      "id": 104,
+      "target_ground_truth": "Mask.",
+      "metadata": {
+        "time": "16:30",
+        "location": "Living Room",
+        "active_participants": [
+          "Kelsey"
+        ]
+      },
+      "dialogue_history": {
+        "previous_speaker": "Kelsey",
+        "last_utterance": "For the night? Or just for a nap? Need air?"
+      }
+    }
+  },
+  {
+    "id": 105,
+    "target": "No visit. Too... tired.",
+    "last_utterance": "I wish I could do something. Does he want me to come over? I can get the bus.",
+    "interlocutor": "Dawn",
+    "time": "10:15",
+    "location": "Living Room",
+    "active_participants": [
+      "Kelsey",
+      "Nurse Sarah",
+      "Dawn (iPad)"
+    ],
+    "raw": {
+      "id": 105,
+      "target_ground_truth": "No visit. Too... tired.",
+      "metadata": {
+        "time": "10:15",
+        "location": "Living Room",
+        "active_participants": [
+          "Kelsey",
+          "Nurse Sarah",
+          "Dawn (iPad)"
+        ]
+      },
+      "dialogue_history": {
+        "previous_speaker": "Dawn",
+        "last_utterance": "I wish I could do something. Does he want me to come over? I can get the bus."
+      }
+    }
+  }
+]
