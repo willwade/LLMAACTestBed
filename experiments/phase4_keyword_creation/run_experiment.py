@@ -18,15 +18,15 @@ from typing import Any
 project_root = Path(__file__).parent.parent.parent
 sys.path.insert(0, str(project_root))
 
-from lib.llm_clients import create_llm_client
-from lib.utils import load_env, setup_logging
+from lib.llm_clients import create_llm_client  # noqa: E402
+from lib.utils import load_env, setup_logging  # noqa: E402
 
 # Add current directory to path for local imports
 sys.path.append(str(Path(__file__).parent))
 
 # Import directly to avoid lib path issues
-import pandas as pd
-from evaluation.keyword_evaluator import KeywordEvaluator
+import pandas as pd  # noqa: E402
+from evaluation.keyword_evaluator import KeywordEvaluator  # noqa: E402
 
 
 def parse_arguments():

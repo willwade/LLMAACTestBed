@@ -16,10 +16,10 @@ import pandas as pd
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
 from lib.context import ContextBuilder, ProfileManager, PromptBuilder
+from lib.data import DataLoader
 from lib.evaluation import BaseEvaluator
 from lib.llm_clients import create_llm_client
-from lib.utils import ExperimentConfig, setup_logging, load_env
-from lib.data import DataLoader
+from lib.utils import ExperimentConfig, load_env, setup_logging
 
 
 class ContextAwareEvaluator(BaseEvaluator):
@@ -87,11 +87,15 @@ class ContextAwareEvaluator(BaseEvaluator):
             self.logger.info(f"Processing scenario {idx + 1}/{len(transcripts)}")
 
             # Extract scenario data
-            target = scenario.get("target", scenario.get("expected", ""))
+            target = scenario.get(
+                "target", scenario.get("target_ground_truth", scenario.get("expected", ""))
+            )
             interlocutor = scenario.get("interlocutor", "Unknown")
             location = scenario.get("location", {})
             current_time = self._parse_time(scenario.get("time", ""))
-            speech_input = scenario.get("speech", scenario.get("input", ""))
+            speech_input = scenario.get(
+                "speech", scenario.get("input", scenario.get("last_utterance", ""))
+            )
 
             # Test each hypothesis
             hypotheses_results = self._test_hypotheses(
@@ -238,8 +242,10 @@ class ContextAwareEvaluator(BaseEvaluator):
         results = []
 
         for idx, scenario in enumerate(vague_scenarios):
-            input_speech = scenario.get("input", "")
-            target = scenario.get("target", "")
+            input_speech = scenario.get("input", scenario.get("speech", scenario.get("last_utterance", "")))
+            target = scenario.get(
+                "target", scenario.get("target_ground_truth", scenario.get("expected", ""))
+            )
             interlocutor = scenario.get("interlocutor", "Unknown")
 
             # Smart model (with profile)
@@ -347,7 +353,7 @@ class ContextAwareEvaluator(BaseEvaluator):
 
         try:
             return datetime.strptime(f"2024-01-01 {time_str}", "%Y-%m-%d %H:%M")
-        except:
+        except ValueError:
             return datetime.now()
 
 
@@ -428,7 +434,7 @@ def main():
         print(f"Completed: {len(temporal_results)} time tests")
 
     # Generate visualizations
-    for name, results_df in all_results.items():
+    for _name, results_df in all_results.items():
         evaluator.visualize_results(results_df, output_dir)
 
     print(f"\nAll experiments completed! Results saved to: {output_dir}")

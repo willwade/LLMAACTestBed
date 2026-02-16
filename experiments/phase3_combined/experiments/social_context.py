@@ -14,11 +14,10 @@ from typing import Any
 project_root = Path(__file__).parent.parent.parent.parent
 sys.path.insert(0, str(project_root))
 
-from lib.evaluation import MetricsCalculator
-from lib.llm_clients import create_llm_client
-from lib.utils import Config, load_config, load_env, setup_logging
-
-from lib.data import ChatHistoryLoader, ProfileLoader
+from lib.data import ChatHistoryLoader, ProfileLoader  # noqa: E402
+from lib.evaluation import MetricsCalculator  # noqa: E402
+from lib.llm_clients import create_llm_client  # noqa: E402
+from lib.utils import Config, load_config, load_env, setup_logging  # noqa: E402
 
 
 class SocialContextExperiment:

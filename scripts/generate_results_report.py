@@ -126,6 +126,91 @@ def summarize_phase3(files: list[Path]) -> tuple[str, list[str]]:
     return summary, charts
 
 
+def summarize_phase2(files: list[Path]) -> tuple[str, list[str]]:
+    if not files:
+        return "<p>No Phase 2 results found.</p>", []
+
+    charts = []
+    frames = []
+    for path in files:
+        try:
+            if path.suffix.lower() == ".json":
+                data = load_json(path)
+                if isinstance(data, list):
+                    frames.append(pd.DataFrame(data))
+            elif path.suffix.lower() == ".csv":
+                frames.append(pd.read_csv(path))
+        except Exception:
+            continue
+
+    if not frames:
+        return "<p>No parseable Phase 2 results found.</p>", []
+
+    df = pd.concat(frames, ignore_index=True)
+    summary = [f"<p><strong>Rows:</strong> {len(df):,}</p>"]
+
+    score_col = "score" if "score" in df.columns else "smart_score" if "smart_score" in df.columns else None
+    if "hypothesis" in df.columns and score_col:
+        pivot = df.groupby("hypothesis")[[score_col]].mean().reset_index()
+        fig, ax = plt.subplots(figsize=(6, 3.5))
+        ax.bar(pivot["hypothesis"], pivot[score_col], color="#4C78A8")
+        ax.set_title("Phase 2: Mean Score by Hypothesis")
+        ax.set_ylabel("Mean score")
+        ax.set_xlabel("Hypothesis")
+        charts.append(fig_to_base64(fig))
+        summary.append(f"<p><strong>Hypotheses detected:</strong> {', '.join(pivot['hypothesis'].astype(str).tolist())}</p>")
+
+    if "improvement" in df.columns:
+        fig, ax = plt.subplots(figsize=(6, 3.5))
+        ax.hist(df["improvement"].dropna(), bins=12, color="#F58518")
+        ax.set_title("Phase 2: Improvement Distribution")
+        ax.set_xlabel("Improvement")
+        ax.set_ylabel("Count")
+        charts.append(fig_to_base64(fig))
+        summary.append(f"<p><strong>Mean improvement:</strong> {df['improvement'].mean():.4f}</p>")
+
+    return "".join(summary), charts
+
+
+def summarize_phase4(files: list[Path]) -> tuple[str, list[str]]:
+    if not files:
+        return "<p>No Phase 4 results found.</p>", []
+
+    charts = []
+    summaries: list[str] = []
+    for path in files:
+        if path.suffix.lower() != ".json":
+            continue
+        try:
+            data = load_json(path)
+        except Exception:
+            continue
+
+        if isinstance(data, dict) and "summary_statistics" in data:
+            stats = data["summary_statistics"]
+            stats_rows = []
+            for part, values in stats.items():
+                if isinstance(values, dict):
+                    stats_rows.append({"part": part, **values})
+            if stats_rows:
+                df = pd.DataFrame(stats_rows)
+                summaries.append(df.to_html(index=False))
+                if "mean_score" in df.columns:
+                    fig, ax = plt.subplots(figsize=(7, 3.5))
+                    ax.bar(df["part"], df["mean_score"], color="#72B7B2")
+                    ax.set_title("Phase 4: Mean Score by Experiment Part")
+                    ax.set_ylabel("Mean score")
+                    ax.set_xlabel("Part")
+                    charts.append(fig_to_base64(fig))
+        elif isinstance(data, dict):
+            summaries.append(f"<pre>{json.dumps(data, indent=2)[:4000]}</pre>")
+
+    if not summaries:
+        return "<p>No parseable Phase 4 results found.</p>", []
+
+    return "".join(summaries), charts
+
+
 def summarize_phase5(files: list[Path]) -> tuple[str, list[str]]:
     if not files:
         return "<p>No Phase 5 results found.</p>", []
@@ -224,7 +309,9 @@ def render_report() -> None:
         missing.append("Phase 5: memory")
 
     phase1_summary, phase1_charts = summarize_phase1(results["phase1"])
+    phase2_summary, phase2_charts = summarize_phase2(results["phase2"])
     phase3_summary, phase3_charts = summarize_phase3(results["phase3"])
+    phase4_summary, phase4_charts = summarize_phase4(results["phase4"])
     phase5_summary, phase5_charts = summarize_phase5(results["phase5"])
 
     html_parts = []
@@ -256,7 +343,9 @@ def render_report() -> None:
     html_parts.append("<div class='section'><h2>Layman Descriptions</h2>")
     html_parts.append(
         "<p><strong>Phase 1:</strong> Tests how well the system can finish a sentence when given partial input and basic context.</p>"
+        "<p><strong>Phase 2:</strong> Tests different context combinations (time, who is present, location, profile) to see what helps disambiguate intent.</p>"
         "<p><strong>Phase 3:</strong> Tests whether adding information about relationships (social context) or personal profiles improves response accuracy.</p>"
+        "<p><strong>Phase 4:</strong> Tests converting keywords into useful utterances, with and without richer contextual information.</p>"
         "<p><strong>Phase 5:</strong> Tests memory strategies (no memory vs RAG vs Cognee) to see if recent conversation improves accuracy.</p>"
     )
     html_parts.append("</div>")
@@ -267,9 +356,21 @@ def render_report() -> None:
         html_parts.append(f"<img src='data:image/png;base64,{chart}' />")
     html_parts.append("</div>")
 
+    html_parts.append("<div class='section'><h2>Phase 2 Results</h2>")
+    html_parts.append(phase2_summary)
+    for chart in phase2_charts:
+        html_parts.append(f"<img src='data:image/png;base64,{chart}' />")
+    html_parts.append("</div>")
+
     html_parts.append("<div class='section'><h2>Phase 3 Results</h2>")
     html_parts.append(phase3_summary)
     for chart in phase3_charts:
+        html_parts.append(f"<img src='data:image/png;base64,{chart}' />")
+    html_parts.append("</div>")
+
+    html_parts.append("<div class='section'><h2>Phase 4 Results</h2>")
+    html_parts.append(phase4_summary)
+    for chart in phase4_charts:
         html_parts.append(f"<img src='data:image/png;base64,{chart}' />")
     html_parts.append("</div>")
 
@@ -283,10 +384,22 @@ def render_report() -> None:
     html_parts.append(
         "<p><strong>Phase 1:</strong> Aggregates embedding similarity and LLM-judge scores across context filters and generation methods. "
         "Focus is on whether context filters improve semantic alignment.</p>"
+        "<p><strong>Phase 2:</strong> H1-H5 context ablations are useful, but transcript schema consistency is critical; missing or mismatched fields can silently degrade validity.</p>"
         "<p><strong>Phase 3:</strong> Compares baseline vs enhanced scores. The key signal is mean improvement and improvement rate. "
         "Energy cost is tracked when available.</p>"
+        "<p><strong>Phase 4:</strong> Evaluates keyword-to-utterance quality with context levels, but result quality depends on representative keyword distributions and reliable ground truth utterances.</p>"
         "<p><strong>Phase 5:</strong> Compares baseline, RAG, and Cognee (if run). Includes shuffled/random-memory baselines to control for prompt length. "
         "Paired t-tests and bootstrap CIs are included in the raw JSON output.</p>"
+        "<p><strong>Potential issues and missing pieces:</strong></p>"
+        "<ul>"
+        "<li><strong>Data quality and scale:</strong> Current synthetic data is small and partially templated, limiting external validity.</li>"
+        "<li><strong>Schema drift risk:</strong> Several scripts consume different field names (`target`, `target_ground_truth`, `speech`, `last_utterance`), which can create hidden evaluation errors.</li>"
+        "<li><strong>LLM judge bias/variance:</strong> Single-model judging can be unstable and style-sensitive; scores can drift by prompt wording rather than intent fidelity.</li>"
+        "<li><strong>Generator-judge coupling:</strong> Using similar model families for generation and judging can inflate agreement and hide errors.</li>"
+        "<li><strong>Phase 3 score scaling bug risk:</strong> `judge_similarity` returns 1-10 in clients, but Phase 3 divides by 100, compressing signal to near-zero.</li>"
+        "<li><strong>No human adjudication loop:</strong> Missing manual review sample makes it hard to validate automatic metrics for clinical communication quality.</li>"
+        "<li><strong>Limited partner-action instrumentation:</strong> Stage directions are often unavailable in deployment; these should remain optional context, not required input.</li>"
+        "</ul>"
     )
     html_parts.append("</div>")
 

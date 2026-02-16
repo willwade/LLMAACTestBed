@@ -52,7 +52,7 @@ def build_conversations(
     convs: list[dict[str, Any]] = []
     chat_index = 1
 
-    for user, items in by_user.items():
+    for _user, items in by_user.items():
         items.sort(
             key=lambda x: parse_ts(x.get("metadata", [{}])[0].get("timestamp")) or dt.datetime.min
         )

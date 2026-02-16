@@ -38,15 +38,15 @@ def run_experiment():
         # This avoids the conflict between JSON braces and .format() braces.
         current_system = f"""
         You are an AAC assistant for Dave.
-        
+
         USER PROFILE:
         {json.dumps(profile, indent=2)}
-        
+
         CURRENT CONTEXT:
         Time: {sc['time']}
-        
+
         INSTRUCTIONS:
-        Predict Dave's response based on the input speech. 
+        Predict Dave's response based on the input speech.
         If the speech is vague (e.g. "the usual"), use the TIME and the PROFILE to guess the routine.
         Output only the short phrase response.
         """

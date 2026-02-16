@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# ruff: noqa: I001
 """
 Simplified Phase 4: Keyword-to-Utterance Generation with Contextual Enhancement
 

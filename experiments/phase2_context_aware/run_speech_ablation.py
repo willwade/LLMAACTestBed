@@ -30,8 +30,8 @@ def run_experiment():
 
     # SYSTEM PROMPT 2: GENERIC (The "Raw Speech" Test)
     dumb_system = """
-    You are a helpful predictive text assistant. 
-    Predict the next logical response based on the input speech. 
+    You are a helpful predictive text assistant.
+    Predict the next logical response based on the input speech.
     Keep it short.
     """
 

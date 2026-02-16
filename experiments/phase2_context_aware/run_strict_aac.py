@@ -48,19 +48,19 @@ def evaluate_intent_match(model, target, prediction):
     Compare these two phrases.
     1. TARGET INTENT: "{target}"
     2. AI PREDICTION: "{prediction}"
-    
+
     Rate the similarity of the INTENT (Actionability/Meaning) on a scale of 1 to 10.
     1 = Completely wrong/harmful.
     5 = Vague or related topic but wrong action.
     10 = Perfect match.
-    
+
     Return ONLY the integer.
     """
     try:
         response = model.prompt(judge_prompt, system=judge_system, temperature=0.0)
         score = "".join(filter(str.isdigit, response.text()))
         return int(score) if score else 0
-    except:
+    except Exception:
         return 0
 
 

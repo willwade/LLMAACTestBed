@@ -6,8 +6,8 @@ Integration of real chat data with synthetic social graphs and user profiles.
 """
 
 import argparse
-import sys
 import importlib
+import sys
 from pathlib import Path
 from typing import Any
 
@@ -15,8 +15,8 @@ from typing import Any
 project_root = Path(__file__).parent.parent.parent
 sys.path.insert(0, str(project_root))
 
-from lib.llm_clients import create_llm_client
-from lib.utils import load_env
+from lib.llm_clients import create_llm_client  # noqa: E402
+from lib.utils import load_env  # noqa: E402
 
 
 def main():
@@ -51,7 +51,7 @@ def main():
         print("\nRunning Profile-Enhanced Experiment...")
         try:
             profile_module = importlib.import_module("profile_enhanced")
-            ProfileEnhancedExperiment = getattr(profile_module, "ProfileEnhancedExperiment")
+            ProfileEnhancedExperiment = profile_module.ProfileEnhancedExperiment
             profile_config = args.config or str(
                 Path(__file__).parent / "configs" / "profile_enhanced.yaml"
             )
@@ -70,7 +70,7 @@ def main():
         print("\nRunning Social Context Experiment...")
         try:
             social_module = importlib.import_module("social_context")
-            SocialContextExperiment = getattr(social_module, "SocialContextExperiment")
+            SocialContextExperiment = social_module.SocialContextExperiment
             exp = SocialContextExperiment(args.config, args.provider, max_chats=20)
             social_results = exp.run_experiment()
             exp.save_results(social_results, args.output)

@@ -18,7 +18,7 @@ from pathlib import Path
 project_root = Path(__file__).resolve().parent.parent.parent
 sys.path.insert(0, str(project_root))
 sys.path.insert(0, str(project_root / "lib"))
-from lib.evaluation.chat_history_evaluator import ChatHistoryEvaluator
+from lib.evaluation.chat_history_evaluator import ChatHistoryEvaluator  # noqa: E402
 
 
 def create_default_methods(evaluator: ChatHistoryEvaluator):
