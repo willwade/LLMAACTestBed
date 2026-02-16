@@ -2,7 +2,10 @@
   {
     "id": 101,
     "target": "Remote. Here.",
-    "last_utterance": "The TV? God, sorry. (Kelsey lowers volume)",
+    "last_utterance": "The TV? God, sorry.",
+    "partner_actions": [
+      "Kelsey lowers volume"
+    ],
     "interlocutor": "Kelsey",
     "time": "16:00",
     "location": "Living Room",
@@ -29,6 +32,7 @@
     "id": 102,
     "target": "Neck. Heavy.",
     "last_utterance": "What is it? Pain?",
+    "partner_actions": [],
     "interlocutor": "Kelsey",
     "time": "16:05",
     "location": "Living Room",
@@ -55,6 +59,7 @@
     "id": 103,
     "target": "Fan. On. Now.",
     "last_utterance": "Dave, you'll freeze.",
+    "partner_actions": [],
     "interlocutor": "Kelsey",
     "time": "16:15",
     "location": "Living Room",
@@ -81,6 +86,7 @@
     "id": 104,
     "target": "Mask.",
     "last_utterance": "For the night? Or just for a nap? Need air?",
+    "partner_actions": [],
     "interlocutor": "Kelsey",
     "time": "16:30",
     "location": "Living Room",
@@ -107,6 +113,7 @@
     "id": 105,
     "target": "No visit. Too... tired.",
     "last_utterance": "I wish I could do something. Does he want me to come over? I can get the bus.",
+    "partner_actions": [],
     "interlocutor": "Dawn",
     "time": "10:15",
     "location": "Living Room",

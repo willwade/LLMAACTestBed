@@ -50,6 +50,15 @@ class Turn:
     raw: dict[str, Any]
 
 
+def _split_stage_directions(text: str) -> tuple[str, list[str]]:
+    if not text:
+        return "", []
+    notes = [match.strip() for match in re.findall(r"\(([^()]*)\)", text) if match.strip()]
+    spoken = re.sub(r"\s*\([^()]*\)", "", text).strip()
+    spoken = re.sub(r"\s{2,}", " ", spoken)
+    return spoken, notes
+
+
 def _normalize_name(name: str | None) -> str:
     if not name:
         return ""
@@ -103,6 +112,7 @@ def normalize_turn(raw: dict[str, Any], profile) -> Turn:
         or raw.get("input")
         or ""
     )
+    cleaned_last_utterance, _notes = _split_stage_directions(str(last_utterance))
     interlocutor = dialogue.get("previous_speaker") or raw.get("interlocutor")
     participants = metadata.get("active_participants") or raw.get("active_participants") or []
     if not interlocutor and participants:
@@ -115,7 +125,7 @@ def normalize_turn(raw: dict[str, Any], profile) -> Turn:
 
     return Turn(
         turn_id=raw.get("id", "unknown"),
-        last_utterance=str(last_utterance),
+        last_utterance=cleaned_last_utterance,
         target=str(target),
         interlocutor=_resolve_interlocutor(interlocutor, profile),
         time=time,

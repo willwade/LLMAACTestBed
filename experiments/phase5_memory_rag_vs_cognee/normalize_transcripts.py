@@ -3,12 +3,31 @@
 from __future__ import annotations
 
 import json
+import re
 from pathlib import Path
 from typing import Any
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 INPUT_PATH = REPO_ROOT / "data" / "synthetic" / "transcripts" / "transcript_data_2.json"
 OUTPUT_PATH = REPO_ROOT / "data" / "synthetic" / "transcripts" / "transcript_data_2_improved.json"
+
+
+def split_stage_directions(text: str) -> tuple[str, list[str]]:
+    """
+    Split transcript text into spoken utterance and parenthetical stage directions.
+
+    Example:
+    "The TV? Sorry. (Kelsey lowers volume)" ->
+      spoken: "The TV? Sorry."
+      notes: ["Kelsey lowers volume"]
+    """
+    if not text:
+        return "", []
+
+    notes = [match.strip() for match in re.findall(r"\(([^()]*)\)", text) if match.strip()]
+    spoken = re.sub(r"\s*\([^()]*\)", "", text).strip()
+    spoken = re.sub(r"\s{2,}", " ", spoken)
+    return spoken, notes
 
 
 def normalize_item(raw: dict[str, Any]) -> dict[str, Any]:
@@ -37,10 +56,13 @@ def normalize_item(raw: dict[str, Any]) -> dict[str, Any]:
         or ([] if not interlocutor else [interlocutor])
     )
 
+    spoken_utterance, stage_directions = split_stage_directions(str(last_utterance))
+
     return {
         "id": raw.get("id"),
         "target": target,
-        "last_utterance": last_utterance,
+        "last_utterance": spoken_utterance,
+        "partner_actions": stage_directions,
         "interlocutor": interlocutor,
         "time": metadata.get("time") or raw.get("time"),
         "location": metadata.get("location") or raw.get("location"),
