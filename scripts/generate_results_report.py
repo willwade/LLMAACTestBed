@@ -260,6 +260,146 @@ def summarize_phase5(files: list[Path]) -> tuple[str, list[str]]:
     return summary_html, charts
 
 
+def _phase1_example(files: list[Path]) -> str:
+    for path in files:
+        try:
+            data = load_json(path)
+        except Exception:
+            continue
+        if isinstance(data, list) and data:
+            row = data[0]
+            partial = row.get("partial", "")
+            target = row.get("target", "")
+            proposal = row.get("proposal", "")
+            return (
+                "<details><summary>Example: how Phase 1 works on real chat history</summary>"
+                f"<p>Input fragment: <code>{partial}</code></p>"
+                f"<p>Target phrase from chat history: <code>{target}</code></p>"
+                f"<p>Model completion example: <code>{proposal}</code></p>"
+                "<p>Experiment compares completions with and without contextual retrieval filters.</p>"
+                "</details>"
+            )
+    return "<details><summary>Example: how Phase 1 works</summary><p>No result sample found.</p></details>"
+
+
+def _phase2_example(files: list[Path]) -> str:
+    for path in files:
+        try:
+            if path.suffix.lower() == ".json":
+                data = load_json(path)
+                if isinstance(data, list) and data:
+                    row = data[0]
+                    speech = row.get("speech_input") or row.get("input") or row.get("last_utterance") or ""
+                    target = row.get("target") or row.get("target_ground_truth") or ""
+                    return (
+                        "<details><summary>Example: how Phase 2 context ablation works</summary>"
+                        f"<p>Prompt seed: <code>{speech}</code></p>"
+                        f"<p>Expected intent: <code>{target}</code></p>"
+                        "<p>Runs H1-H5 by progressively adding context: time, people, location, profile, then full context.</p>"
+                        "</details>"
+                    )
+        except Exception:
+            continue
+
+    # Fallback to transcript example when phase2 outputs are missing
+    fallback = REPO_ROOT / "data" / "synthetic" / "transcripts" / "transcript_data_2_improved.json"
+    if fallback.exists():
+        try:
+            data = load_json(fallback)
+            if isinstance(data, list) and data:
+                row = data[0]
+                return (
+                    "<details><summary>Example: how Phase 2 context ablation works (synthetic fallback)</summary>"
+                    f"<p>Partner utterance: <code>{row.get('last_utterance', '')}</code></p>"
+                    f"<p>Target intent: <code>{row.get('target', '')}</code></p>"
+                    f"<p>Context fields tested: time=<code>{row.get('time', '')}</code>, "
+                    f"interlocutor=<code>{row.get('interlocutor', '')}</code>, "
+                    f"location=<code>{row.get('location', '')}</code>.</p>"
+                    "</details>"
+                )
+        except Exception:
+            pass
+    return "<details><summary>Example: how Phase 2 works</summary><p>No sample found.</p></details>"
+
+
+def _phase3_example(files: list[Path]) -> str:
+    for path in files:
+        try:
+            data = load_json(path)
+        except Exception:
+            continue
+        if not isinstance(data, dict):
+            continue
+        exp_type = data.get("experiment_type", "phase3")
+        mean_imp = data.get("mean_improvement")
+        total = data.get("total_chats")
+        enhanced = data.get("social_enhanced", data.get("enhanced_chats"))
+        return (
+            "<details><summary>Example: how Phase 3 profile/social context works</summary>"
+            f"<p>Run type: <code>{exp_type}</code></p>"
+            f"<p>Chats evaluated: <code>{total}</code>, chats with added context: <code>{enhanced}</code></p>"
+            f"<p>Mean improvement vs baseline: <code>{mean_imp}</code></p>"
+            "</details>"
+        )
+    return "<details><summary>Example: how Phase 3 works</summary><p>No result sample found.</p></details>"
+
+
+def _phase4_example(files: list[Path]) -> str:
+    for path in files:
+        if path.suffix.lower() != ".json":
+            continue
+        try:
+            data = load_json(path)
+        except Exception:
+            continue
+        if isinstance(data, dict) and "summary_statistics" in data:
+            keys = ", ".join(data["summary_statistics"].keys())
+            return (
+                "<details><summary>Example: how Phase 4 keyword-to-utterance works</summary>"
+                "<p>Input is 1-3 keywords (for example: <code>fan, on, now</code>) and the model generates a usable utterance.</p>"
+                f"<p>Detected evaluated parts: <code>{keys}</code></p>"
+                "</details>"
+            )
+    return (
+        "<details><summary>Example: how Phase 4 keyword-to-utterance works</summary>"
+        "<p>No Phase 4 output found yet. Expected pattern: input keywords like <code>water, straw</code> "
+        "then compare generated utterance quality with and without extra context.</p>"
+        "</details>"
+    )
+
+
+def _phase5_example(files: list[Path]) -> str:
+    for path in files:
+        try:
+            data = load_json(path)
+        except Exception:
+            continue
+        if isinstance(data, dict):
+            rows = data.get("results", [])
+            if rows:
+                row = rows[0]
+                return (
+                    "<details><summary>Example: how Phase 5 memory testing works</summary>"
+                    f"<p>Turn input: <code>{row.get('last_utterance', '')}</code></p>"
+                    f"<p>Target response: <code>{row.get('target', '')}</code></p>"
+                    f"<p>Memory mode tested on this row: <code>{row.get('memory_mode', '')}</code></p>"
+                    "<p>Same turn is re-run across modes: baseline, RAG retrieval, and Cognee (if available).</p>"
+                    "</details>"
+                )
+    return "<details><summary>Example: how Phase 5 works</summary><p>No result sample found.</p></details>"
+
+
+def build_layman_examples(results: dict[str, list[Path]]) -> str:
+    sections = [
+        _phase1_example(results["phase1"]),
+        _phase2_example(results["phase2"]),
+        _phase3_example(results["phase3"]),
+        _phase4_example(results["phase4"]),
+        _phase5_example(results["phase5"]),
+    ]
+    return "".join(sections)
+
+
 def find_results() -> dict[str, list[Path]]:
     phase1 = []
     phase2 = []
@@ -279,16 +419,42 @@ def find_results() -> dict[str, list[Path]]:
         elif "phase4" in path.name or "keyword" in path.name:
             phase4.append(path)
 
-    # Look for phase2/4 outputs in synthetic outputs if present
-    outputs_dir = REPO_ROOT / "data" / "synthetic" / "outputs"
-    if outputs_dir.exists():
-        for path in outputs_dir.rglob("*.*"):
+    # Broad search for Phase 2/4 outputs across common roots.
+    search_roots = [
+        REPO_ROOT / "data" / "synthetic" / "outputs",
+        REPO_ROOT / "results",
+        REPO_ROOT / "experiments" / "phase4_keyword_creation" / "results",
+    ]
+    for root in search_roots:
+        if not root.exists():
+            continue
+        for path in root.rglob("*.*"):
             name = path.name.lower()
-            if name.endswith(".csv") or name.endswith(".json"):
-                if "hypothesis" in name or "ablation" in name or "temporal" in name:
-                    phase2.append(path)
-                if "keyword" in name or "phase4" in name:
-                    phase4.append(path)
+            if not (name.endswith(".csv") or name.endswith(".json")):
+                continue
+            if (
+                "hypothesis_test" in name
+                or "ablation_test" in name
+                or "temporal_test" in name
+                or ("phase2" in name and ("result" in name or "summary" in name))
+            ):
+                phase2.append(path)
+            if (
+                "part1_baseline_results" in name
+                or "part2_contextual_results" in name
+                or "part3_single_keyword_results" in name
+                or "experiment_summary" in name
+                or ("phase4" in name and ("result" in name or "summary" in name))
+                or ("keyword" in name and ("result" in name or "summary" in name))
+            ):
+                phase4.append(path)
+
+    # De-duplicate while preserving order.
+    phase1 = list(dict.fromkeys(phase1))
+    phase2 = list(dict.fromkeys(phase2))
+    phase3 = list(dict.fromkeys(phase3))
+    phase4 = list(dict.fromkeys(phase4))
+    phase5 = list(dict.fromkeys(phase5))
 
     return {"phase1": phase1, "phase2": phase2, "phase3": phase3, "phase4": phase4, "phase5": phase5}
 
@@ -313,6 +479,7 @@ def render_report() -> None:
     phase3_summary, phase3_charts = summarize_phase3(results["phase3"])
     phase4_summary, phase4_charts = summarize_phase4(results["phase4"])
     phase5_summary, phase5_charts = summarize_phase5(results["phase5"])
+    layman_examples = build_layman_examples(results)
 
     html_parts = []
     html_parts.append("<html><head><title>LLMAAC Experiment Report</title>")
@@ -348,6 +515,7 @@ def render_report() -> None:
         "<p><strong>Phase 4:</strong> Tests converting keywords into useful utterances, with and without richer contextual information.</p>"
         "<p><strong>Phase 5:</strong> Tests memory strategies (no memory vs RAG vs Cognee) to see if recent conversation improves accuracy.</p>"
     )
+    html_parts.append(layman_examples)
     html_parts.append("</div>")
 
     html_parts.append("<div class='section'><h2>Phase 1 Results</h2>")

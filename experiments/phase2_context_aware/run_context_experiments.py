@@ -361,24 +361,26 @@ def main():
     """Main entry point for Phase 2 experiments."""
     import argparse
 
+    repo_root = Path(__file__).resolve().parents[2]
+
     parser = argparse.ArgumentParser(description="Run Phase 2 Context-Aware Experiments")
 
     parser.add_argument(
         "--profile",
         type=str,
-        default="../../data/synthetic/profiles/dave_context.json",
+        default=str(repo_root / "data" / "synthetic" / "profiles" / "dave_context.json"),
         help="Path to user profile",
     )
     parser.add_argument(
         "--transcripts",
         type=str,
-        default="../../data/synthetic/transcripts/transcript_data_2.json",
+        default=str(repo_root / "data" / "synthetic" / "transcripts" / "transcript_data_2_improved.json"),
         help="Path to transcript scenarios",
     )
     parser.add_argument(
         "--vague",
         type=str,
-        default="../../data/synthetic/transcripts/transcript_vague.json",
+        default=str(repo_root / "data" / "synthetic" / "transcripts" / "transcript_vague.json"),
         help="Path to vague input scenarios",
     )
     parser.add_argument(
@@ -389,7 +391,10 @@ def main():
         help="Which experiment to run",
     )
     parser.add_argument(
-        "--output", type=str, default="../../data/synthetic/outputs", help="Output directory"
+        "--output",
+        type=str,
+        default=str(repo_root / "data" / "synthetic" / "outputs"),
+        help="Output directory",
     )
     parser.add_argument("--model", type=str, default="gpt-4o-mini", help="LLM model to use")
     parser.add_argument(

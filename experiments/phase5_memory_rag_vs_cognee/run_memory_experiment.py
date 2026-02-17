@@ -286,8 +286,26 @@ async def cognee_clear_memory() -> None:
 def configure_cognee_storage(base_dir: Path) -> None:
     if not HAS_COGNEE:
         return
-    data_dir = base_dir / "data"
-    system_dir = base_dir / "system"
+    # Windows path workaround: Cognee builds file:// URIs without the required triple slash.
+    try:
+        from cognee.infrastructure.files.storage.LocalFileStorage import LocalFileStorage
+
+        original_store = LocalFileStorage.store
+
+        def _store_with_valid_file_uri(self, file_path: str, data, overwrite: bool = False) -> str:
+            result = original_store(self, file_path, data, overwrite)
+            if os.name == "nt" and result.startswith("file://") and not result.startswith("file:///"):
+                fs_path = result[len("file://") :]
+                return Path(fs_path).resolve().as_uri()
+            return result
+
+        LocalFileStorage.store = _store_with_valid_file_uri  # type: ignore[assignment]
+    except Exception:
+        pass
+
+    base_dir = base_dir.resolve()
+    data_dir = (base_dir / "data").resolve()
+    system_dir = (base_dir / "system").resolve()
     data_dir.mkdir(parents=True, exist_ok=True)
     system_dir.mkdir(parents=True, exist_ok=True)
 
@@ -301,6 +319,7 @@ def configure_cognee_storage(base_dir: Path) -> None:
 
     os.environ["COGNEE_DATA_ROOT_DIRECTORY"] = str(data_dir)
     os.environ["COGNEE_SYSTEM_ROOT_DIRECTORY"] = str(system_dir)
+    os.environ["COGNEE_STORAGE_DIR"] = str(base_dir)
 
 
 def extract_cognee_snippets(results: list[Any], max_snippets: int = 3) -> list[str]:
@@ -312,7 +331,7 @@ def extract_cognee_snippets(results: list[Any], max_snippets: int = 3) -> list[s
                 or result.get("content")
                 or result.get("chunk")
                 or result.get("node", {}).get("text")
-                or json.dumps(result)
+                or json.dumps(result, default=str)
             )
         else:
             text = str(result)
@@ -444,7 +463,6 @@ async def run_experiment(args: argparse.Namespace) -> dict[str, Any]:
 
     rag_memory = RagMemory(model_name=args.embedding_model, top_k=args.top_k)
     static_memory = render_social_graph(profile)
-    global_memory_pool = [format_turn_memory(t) for t in turns]
     rng = random.Random(args.random_seed)
 
     if args.use_cognee and HAS_COGNEE:
@@ -472,6 +490,8 @@ async def run_experiment(args: argparse.Namespace) -> dict[str, Any]:
 
         conversation_history: list[str] = []
         session_memory_texts: list[str] = []
+        # Controls must only use memory available up to this turn (no future leakage).
+        past_memory_pool: list[str] = list(static_memory)
 
         for turn_idx, turn in enumerate(session, start=1):
             if args.max_turns and turn_idx > args.max_turns:
@@ -555,7 +575,7 @@ async def run_experiment(args: argparse.Namespace) -> dict[str, Any]:
             )
 
             # Random memory (same count)
-            random_candidates = list(global_memory_pool)
+            random_candidates = list(past_memory_pool)
             rng.shuffle(random_candidates)
             random_snippets = random_candidates[: len(rag_snippets)]
             system_prompt, user_prompt = build_prompts(
@@ -591,9 +611,9 @@ async def run_experiment(args: argparse.Namespace) -> dict[str, Any]:
             )
 
             # Shuffled memory (exclude current session memory if possible)
-            shuffled_candidates = [m for m in global_memory_pool if m not in session_memory_texts]
+            shuffled_candidates = [m for m in past_memory_pool if m not in session_memory_texts]
             if len(shuffled_candidates) < len(rag_snippets):
-                shuffled_candidates = list(global_memory_pool)
+                shuffled_candidates = list(past_memory_pool)
             rng.shuffle(shuffled_candidates)
             shuffled_snippets = shuffled_candidates[: len(rag_snippets)]
             system_prompt, user_prompt = build_prompts(
@@ -673,6 +693,7 @@ async def run_experiment(args: argparse.Namespace) -> dict[str, Any]:
             memory_text = format_turn_memory(turn)
             rag_memory.add(memory_text)
             session_memory_texts.append(memory_text)
+            past_memory_pool.append(memory_text)
             if args.use_cognee and HAS_COGNEE:
                 await cognee.add([memory_text])
                 if args.cognee_update_each_turn:
