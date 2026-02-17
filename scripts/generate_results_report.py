@@ -202,6 +202,30 @@ def summarize_phase4(files: list[Path]) -> tuple[str, list[str]]:
                     ax.set_ylabel("Mean score")
                     ax.set_xlabel("Part")
                     charts.append(fig_to_base64(fig))
+        elif isinstance(data, dict) and "part1_baseline" in data:
+            # Support simplified runner output shape.
+            part_rows = []
+            for part_name in ["part1_baseline", "part2_contextual", "part3_single_keyword"]:
+                part = data.get(part_name, {})
+                if isinstance(part, dict):
+                    scores = part.get("scores", [])
+                    if scores:
+                        part_rows.append(
+                            {
+                                "part": part_name,
+                                "total_tests": len(scores),
+                                "mean_score": float(sum(scores) / len(scores)),
+                            }
+                        )
+            if part_rows:
+                df = pd.DataFrame(part_rows)
+                summaries.append(df.to_html(index=False))
+                fig, ax = plt.subplots(figsize=(7, 3.5))
+                ax.bar(df["part"], df["mean_score"], color="#72B7B2")
+                ax.set_title("Phase 4: Mean Score by Experiment Part")
+                ax.set_ylabel("Mean score")
+                ax.set_xlabel("Part")
+                charts.append(fig_to_base64(fig))
         elif isinstance(data, dict):
             summaries.append(f"<pre>{json.dumps(data, indent=2)[:4000]}</pre>")
 
@@ -444,6 +468,7 @@ def find_results() -> dict[str, list[Path]]:
                 or "part2_contextual_results" in name
                 or "part3_single_keyword_results" in name
                 or "experiment_summary" in name
+                or "simple_results" in name
                 or ("phase4" in name and ("result" in name or "summary" in name))
                 or ("keyword" in name and ("result" in name or "summary" in name))
             ):
